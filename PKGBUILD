@@ -1,22 +1,25 @@
-# Maintainer: Glaucous <glakke1@gmail.com>
-
+# Maintainer: Glaucous <glakke1 at gmail dot com>
 pkgname=glakkeclock-git
 pkgver=20110425
 pkgrel=2
-pkgdesc="AMD/ATI graphics card utility."
-url="https://sourceforge.net/projects/glakkeclock/"
+pkgdesc="AMD/ATI graphics card utility, overclocking."
 arch=('x86_64' 'i686')
+url="https://sourceforge.net/projects/glakkeclock/"
 license=('GPLv3')
+groups=()
 depends=('catalyst-utils' 'lib32-catalyst-utils')
-optdepends=()
 makedepends=('cmake>=2.8' 'git')
+optdepends=()
 provides=('glakkeclock')
 conflicts=('glakkeclock')
-replaces=('glakkeclock')
+replaces=()
 backup=()
+options=()
+install=
+changelog=
 source=('http://download2-developer.amd.com/amd/GPU/zip/ADL_SDK_3.0.zip')
+noextract=()
 md5sums=('cf380f94502b6a2860c11b8fd6b19a3c')
-
 
 _gitroot='git://github.com/Glakke/glakkeclock.git'
 _gitname='glakkeclock'
