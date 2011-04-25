@@ -3,7 +3,7 @@
 # ADL_FOUND
 # ADL_LIBRARY
 # ADL_INCLUDE_DIR
-# Glaucous 2011 <glakke1@gmail.com>
+# Glaucous 2011 <glakke1 at gmail dot com>
 
 find_path(
 ADL_INCLUDE_DIR
