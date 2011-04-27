@@ -1,43 +1,54 @@
-cmake_minimum_required(VERSION 2.6)
-project(glakkeclock)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+PROJECT(glakkeclock)
 
-set(KKE_VERSION 0.11.00 CACHE STRING "Program version")
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
-if(UNIX)
-  add_definitions("-DLINUX")
-elseif(WINDOWS)
-  add_definitions("-DWINDOWS")
-else()
-  message(FATAL_ERROR "Operating System ${CMAKE_SYSTEM_NAME} not supported.")
-endif()
+# Arch
+IF(NOT DEFINED ${KKE_ARCH})
+	IF (CMAKE_SIZEOF_VOID_P MATCHES "8")
+		SET(KKE_ARCH "x86_64" CACHE STRING "ARCH")
+	ELSEIF(CMAKE_SIZEOF_VOID_P MATCHES "4")
+		SET(KKE_ARCH "x86" CACHE STRING "ARCH")
+	ELSE()
+		SET(KKE_ARCH "x86_64" CACHE STRING "ARCH")
+		MESSAGE(WARNING "Could not define ARCH, using ${KKE_ARCH}.")
+	ENDIF()
+ELSEIF(NOT KKE_ARCH MATCHES "x86_64" AND NOT KKE_ARCH MATCHES "x86")
+		MESSAGE(FATAL_ERROR "Invalid KKE_ARCH (${KKE_ARCH}), use x86_64 or x86")
+ENDIF()
 
-if(NOT EXISTS ${CMAKE_INSTALL_PREFIX})
-  set(CMAKE_INSTALL_PREFIX  "/usr")
-endif()
+IF(KKE_ARCH MATCHES "x86_64")
+  ADD_DEFINITIONS("-m64")
+ELSEIF(${KKE_ARCH} MATCHES "x86")
+  ADD_DEFINITIONS("-m32")
+ENDIF()
 
-# Kdevelop workaround
-if(NOT DEFINED ${KKE_ARCH})
-	set(KKE_ARCH "x86_64" CACHE STRING "Architecture")
-endif()
+MESSAGE(STATUS "Using ARCH: ${KKE_ARCH}")
 
-if(${KKE_ARCH} MATCHES "x86_64")
-  add_definitions("-m64")
-elseif(${KKE_ARCH} MATCHES "x86")
-  add_definitions("-m32")
-else()
-  message(FATAL_ERROR "Wrong architecture, ${KKE_ARCH}! (x86_64 or x86)")
-endif()
+# Version
+SET(KKE_VERSION 0.1 CACHE STRING "VERSION")
+MESSAGE(STATUS "Version: ${KKE_VERSION}")
 
-find_package(ADL REQUIRED)
+# OS
+IF(UNIX)
+  ADD_DEFINITIONS("-DLINUX")
+ELSEIF(WIN32)
+  ADD_DEFINITIONS("-DWINDOWS")
+ELSE(WIN32)
+  MESSAGE(FATAL_ERROR "Operating System ${CMAKE_SYSTEM_NAME} not (officially) supported.")
+ENDIF()
 
-add_definitions("-Wall -DADLLOC='\"${ADL_LIBRARY}\"' -DVERSION='\"${KKE_VERSION}\"'")
-set(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG")
-set(CMAKE_CXX_FLAGS_RELEASE "-DRELEASE -O2")
+ADD_DEFINITIONS("-Wall -DADLLOC='\"${ADL_LIBRARY}\"' -DVERSION='\"${KKE_VERSION}\"'")
 
-set(KKE_BIN glakkeclock CACHE STRING "Filename")
+SET(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG")
+SET(CMAKE_CXX_FLAGS_RELEASE "-DRELEASE -O3")
+SET(CMAKE_CXX_FLAGS_PROFILING "-pg -O0 -c")
 
-add_executable(
+SET(KKE_BIN glakkeclock CACHE STRING "Filename")
+
+FIND_PACKAGE(ADL REQUIRED)
+
+ADD_EXECUTABLE(
 ${KKE_BIN}
 
 src/ArgParser/ArgParser.cpp
@@ -49,11 +60,11 @@ src/GlakkeClock.cpp
 src/Device.cpp
 )
 
-include_directories(
+INCLUDE_DIRECTORIES(
 "${CMAKE_SOURCE_DIR}/src"
 ${ADL_INCLUDE_DIR})
 
-target_link_libraries(
+TARGET_LINK_LIBRARIES(
 ${KKE_BIN} 
 
 ${ADL_LIBRARY})

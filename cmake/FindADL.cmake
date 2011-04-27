@@ -5,7 +5,7 @@
 # ADL_INCLUDE_DIR
 # Glaucous 2011 <glakke1 at gmail dot com>
 
-find_path(
+FIND_PATH(
 ADL_INCLUDE_DIR
 
 NAMES
@@ -21,27 +21,31 @@ DOC
 "Directory where adl_sdk.h resides"
 )
 
-find_library(
+FIND_LIBRARY(
 ADL_LIBRARY
 
 NAMES
 atiadlxx
-fglrx/${CMAKE_SHARED_LIBRARY_PREFIX}atiadlxx${CMAKE_SHARED_LIBRARY_SUFFIX}
 
 PATHS
+/usr/lib/fglrx
 
 DOC
 "ADL library location")
 
-set(ADL_FOUND "FALSE")
-if(ADL_LIBRARY AND ADL_INCLUDE_DIR)
-	set(ADL_FOUND "TRUE")
-endif()
+SET(ADL_FOUND "NO")
+IF(ADL_LIBRARY AND ADL_INCLUDE_DIR)
+	SET(ADL_FOUND "YES")
+ENDIF()
 
-if(${ADL_FOUND} MATCHES "FALSE" AND NOT ADL_FIND_QUIETLY)
-	if(ADL_FIND_REQUIRED)
-		message(FATAL_ERROR "ADL required, but wasn't found.")
-	else()
-		message(STATUS "ADL wasn't found.")
-	endif()
-endif()
+IF(ADL_FIND_REQUIRED AND ADL_FOUND MATCHES "NO")
+	MESSAGE(FATAL_ERROR "ADL required, but wasn't found.")
+ENDIF()
+
+IF(NOT ADL_FIND_QUIETLY)
+	MESSAGE(STATUS "ADL FOUND: ${ADL_FOUND}")
+	IF(ADL_FOUND MATCHES "YES")
+		MESSAGE(STATUS ${ADL_INCLUDE_DIR})
+		MESSAGE(STATUS ${ADL_LIBRARY})
+	ENDIF()
+ENDIF()
