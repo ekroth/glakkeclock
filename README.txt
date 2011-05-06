@@ -21,7 +21,7 @@ Please note that the open-source drivers will _NOT_ work!
 Now cd into root directory and run following commands:
 
 mkdir build && cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DKKE_ARCH=<x86 OR x86_64> -DCMAKE_BUILD_TYPE=Release
+cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release
 make
 
 
