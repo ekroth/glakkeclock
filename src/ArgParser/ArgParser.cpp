@@ -30,7 +30,7 @@ using std::istringstream;
 using std::cout;
 using std::endl;
 
-ArgParser::ArgParser()
+ArgParser::ArgParser() : tolower(false)
 {
 
 }
@@ -54,7 +54,7 @@ int ArgParser::ValidArg(const std::string& arg) const
 {
 	for (ArgMap::const_iterator it = argMap.begin(); it != argMap.end(); it++)
 	{
-		if (it->second.IsArg(arg))
+		if (it->second.IsArg(arg, tolower))
 		{
 			return it->first;
 		}
@@ -115,7 +115,7 @@ bool ArgParser::Process(int argc, char **argv)
 		// Find argument with same name
 		for (ArgMap::iterator it = argMap.begin(); it != argMap.end(); it++)
 		{
-			if (it->second.IsArg(current))
+			if (it->second.IsArg(current, tolower))
 			{
 				argExistMap[it->first] = true;
 				validArg = true;
@@ -227,4 +227,9 @@ bool ArgParser::Register(int id, kke::ArgumentType type, const std::string& lNam
 	
 	argMap[id] = Argument(type, lName, sName, info);
 	return isGood;
+}
+
+void ArgParser::SetToLower(bool value)
+{
+	tolower = value;
 }

@@ -31,11 +31,5 @@ make install
 
 > -- makepkg users (Arch Linux for instance)
 
-* By using makepkg, you won't have to git clone yourself,
-the script will manage this. This also means that you could
-just download the PKGBUILD alone (and not the whole git).
-
-* Copy/Move the PKGBUILD file to another directory, 
-and run 'makepkg', this will build a package. This
-will download AMD Display Library (ADL) as well, everything
-is automated.
+* AUR package available at https://aur.archlinux.org/packages.php?ID=48488
+This will be the "easiest" way to build and install.

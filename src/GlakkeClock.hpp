@@ -38,6 +38,7 @@ namespace kke
 // 		ArgCdevice,
 		ArgCdeviceName,
 		ArgCdeviceUdid,
+		ArgCdeviceIndex,
 // 		ArgCadapter,
 		ArgCperfLevel,
 		
@@ -45,6 +46,7 @@ namespace kke
 		ArgHGinfoLevels,
 		ArgHGname,
 		ArgHGudid,
+		ArgHGindex,
 		ArgHGadapters,
 		ArgHGbusLanes,
 		ArgHGbusLanesMax,

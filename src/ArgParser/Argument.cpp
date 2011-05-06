@@ -85,9 +85,15 @@ kke::ArgumentType Argument::GetType() const
 	return type;
 }
 
-bool Argument::IsArg(const std::string& arg) const
+bool Argument::IsArg(const std::string& arg, bool tolower) const
 {
-	return arg == "--" + lName || arg == "-" + sName;
+	if (tolower)
+	{
+		std::string low = StringToLow(arg);
+		return low == "--" + StringToLow(lName) || low == "-" + StringToLow(sName);
+	}
+	else
+		return arg == "--" + lName || arg == "-" + sName;
 }
 
 void Argument::SetSvalue(const std::string& value)
@@ -103,4 +109,15 @@ void Argument::SetIvalue(int value)
 void Argument::SetInfo(const std::string& info)
 {
 	this->info = info;
+}
+
+string Argument::StringToLow(const string& var) const
+{
+	std::string low;
+	low.reserve(var.length());
+	
+	for (unsigned int i = 0; i < var.length(); i++)
+		low.push_back(tolower(var[i]));
+	
+	return low;
 }

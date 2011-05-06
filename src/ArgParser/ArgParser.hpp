@@ -29,33 +29,35 @@
 
 namespace kke
 {
-typedef std::map<int, Argument> ArgMap;
-typedef std::map<int, bool> ArgExistMap;
-class ArgParser
-{
-public:
-	ArgParser();
-	~ArgParser();
-	
-	bool Process(int argc, char **argv);
-	
-	int GetInt(int arg, int def = 0);
-	std::string GetString(int arg, const std::string &def = std::string());
-	
-	std::string GetlName(int arg);
-	std::string GetsName(int arg);
-	std::string GetInfo(int arg);
-	
-	bool Registered(int arg);
-	bool Exist(int arg);
-	int ValidArg(const std::string &arg) const;
-	
-	bool Register(int id, ArgumentType type, const std::string &lName, const std::string &sName = std::string(), const std::string &info = "No description.");
-	
-private:
-	ArgMap argMap;
-	ArgExistMap argExistMap;
-};
+	typedef std::map<int, Argument> ArgMap;
+	typedef std::map<int, bool> ArgExistMap;
+	class ArgParser
+	{
+	public:
+		ArgParser();
+		~ArgParser();
+		
+		bool Process(int argc, char **argv);
+		
+		int GetInt(int arg, int def = 0);
+		std::string GetString(int arg, const std::string &def = std::string());
+		
+		std::string GetlName(int arg);
+		std::string GetsName(int arg);
+		std::string GetInfo(int arg);
+		
+		bool Registered(int arg);
+		bool Exist(int arg);
+		int ValidArg(const std::string &arg) const;
+		
+		bool Register(int id, ArgumentType type, const std::string &lName, const std::string &sName = std::string(), const std::string &info = "No description.");
+		
+		void SetToLower(bool value);
+	private:
+		ArgMap argMap;
+		ArgExistMap argExistMap;
+		bool tolower;
+	};
 }
 
 #endif // KKE_ARGPARSER_HPP

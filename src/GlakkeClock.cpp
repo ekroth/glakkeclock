@@ -48,7 +48,7 @@ int GlakkeClock::Execute (int argc, char** argv)
 		return 0;
 	
 	// After setting devices, we will have to clean afterwards.
-	
+	argParser.SetToLower(true); // Ignore capital letters
 	if (!registerArgs())
 	{
 		cout << "Failed when registering arguments." << endl;
@@ -80,6 +80,7 @@ void GlakkeClock::output()
 	
 	uint startDevice = 0, endDevice = devices.size();
 	
+	// --- Set device
 	if (argParser.Exist(kke::ArgCdeviceUdid))
 	{
 		bool exists = false;
@@ -106,6 +107,21 @@ void GlakkeClock::output()
 			cout << "UDID doesn't exist." << endl;
 			startDevice = 0;
 			endDevice = 0;
+		}
+	}
+	else if (argParser.Exist(kke::ArgCdeviceIndex))
+	{
+		uint specIndex = argParser.GetInt(kke::ArgCdeviceIndex);
+		if (specIndex >= devices.size())
+		{
+			cout << "Index out of range. Valid: " << '0' << '-' << (devices.size() - 1) << endl;
+			startDevice = 0;
+			endDevice = 0;
+		}
+		else
+		{
+			startDevice = specIndex;
+			endDevice = specIndex + 1;
 		}
 	}
 	else if (argParser.Exist(kke::ArgCdeviceName))
@@ -137,15 +153,17 @@ void GlakkeClock::output()
 		}
 	}
 	
-	// Set device
-	
+	// Run through devices
 	for (uint i = startDevice; i < endDevice; i++)
 	{
 		Device &device = *devices[i];
+		
+		// --- Big info
 		if (argParser.Exist(kke::ArgHGinfo) || argParser.Exist(kke::ArgHGinfoLevels))
 		{
 			cout << "Name: " << device.GetName() << endl;
 			cout << "UDID: " << device.GetUDID() << endl;
+			cout << "Index: " << i << endl;
 			
 			if (device.PollBios().Valid)
 			{
@@ -217,6 +235,9 @@ void GlakkeClock::output()
 		if (argParser.Exist(kke::ArgHGudid))
 			cout << device.GetUDID() << endl;
 		
+		if (argParser.Exist(kke::ArgHGindex))
+			cout << i << endl;
+		
 		if (argParser.Exist(kke::ArgHGadapters))
 			cout << device.GetAdapters().size() << endl;
 		
@@ -240,8 +261,19 @@ void GlakkeClock::output()
 		if (argParser.Exist(kke::ArgOGtemperature) && device.PollTemperature().Valid)
 			cout << device.PollTemperature().Data / 1000 << endl;
 		
-		// Fan
+		if (argParser.Exist(kke::ArgOGactivity) && device.PollActivity().Valid)
+			cout << device.PollActivity().Data.iActivityPercent << endl;
 		
+		if (argParser.Exist(kke::ArgOGclocksGpu) && device.PollActivity().Valid)
+			cout << device.PollActivity().Data.iEngineClock / 100 << endl;
+		
+		if (argParser.Exist(kke::ArgOGclocksMem) && device.PollActivity().Valid)
+			cout << device.PollActivity().Data.iMemoryClock / 100 << endl;
+		
+		if (argParser.Exist(kke::ArgOGclocksVddc) && device.PollActivity().Valid)
+			cout << device.PollActivity().Data.iVddc << endl;
+		
+		// Fan
 		if (argParser.Exist(kke::ArgOGfanType))
 		{
 			if (device.PollFanSpeed().Valid && device.PollFanInfo().Valid)
@@ -287,6 +319,7 @@ void GlakkeClock::output()
 		}
 
 		
+		// --- Overclocking
 		if (argParser.Exist(kke::ArgOSclocksGpu) || argParser.Exist(kke::ArgOSclocksMem) || argParser.Exist(kke::ArgOSclocksVddc) 
 		|| argParser.Exist(kke::ArgOSfan) || argParser.Exist(kke::ArgOSfanReset)
 		|| argParser.Exist(kke::ArgOSclocksGpuReset) || argParser.Exist(kke::ArgOSclocksMemReset) || argParser.Exist(kke::ArgOSclocksVddcReset)
@@ -299,8 +332,7 @@ void GlakkeClock::output()
 			}
 			
 			{
-				int 
-					tmpGpu = argParser.GetInt(kke::ArgOSclocksGpu, 0) * 100, 
+				int tmpGpu = argParser.GetInt(kke::ArgOSclocksGpu, 0) * 100, 
 					tmpMem = argParser.GetInt(kke::ArgOSclocksMem, 0) * 100, 
 					tmpVddc = argParser.GetInt(kke::ArgOSclocksVddc, 0);
 					
@@ -341,7 +373,6 @@ void GlakkeClock::output()
 		}
 
 		// --- Fan
-
 		if (argParser.Exist(kke::ArgOSfan))
 		{
 			if (device.PollFanInfo().Valid && device.PollFanSpeed().Valid)
@@ -470,9 +501,9 @@ bool GlakkeClock::registerArgs()
 
 	// Device options
 // 	good = good && argParser.Register (kke::ArgCdevice, kke::ArgumentInt, "device", "Cd", "Choose device by number.");
-	good = good && argParser.Register (kke::ArgCdeviceName, kke::ArgumentString, "device-name", "Cdn", "Choose device by name.");
-	good = good && argParser.Register (kke::ArgCdeviceUdid, kke::ArgumentString, "device-udid", "Cdu", "Choose device by UDID. (Recommended.)");
-// 	good = good && argParser.Register (kke::ArgCadapter, kke::ArgumentInt, "adapter", "Ca", "Choose adapter by index.");
+	good = good && argParser.Register (kke::ArgCdeviceName, kke::ArgumentString, "device-name", "Cdn", "Choose device by name. (Not for Crossfire)");
+	good = good && argParser.Register (kke::ArgCdeviceUdid, kke::ArgumentString, "device-udid", "Cdu", "Choose device by UDID.");
+	good = good && argParser.Register (kke::ArgCdeviceIndex, kke::ArgumentInt, "device-index", "Cdi", "Choose device by index.");
 	good = good && argParser.Register (kke::ArgCperfLevel, kke::ArgumentInt, "perf-level", "Cpl", "Choose performance level.");
 
 	// Hardware info
@@ -480,6 +511,7 @@ bool GlakkeClock::registerArgs()
 	good = good && argParser.Register (kke::ArgHGinfoLevels, kke::ArgumentExist, "get-info-levels", "HGil", "Extended device information.");
 	good = good && argParser.Register (kke::ArgHGname, kke::ArgumentExist, "get-name", "HGn", "Device name.");
 	good = good && argParser.Register (kke::ArgHGudid, kke::ArgumentExist, "get-udid", "HGu", "Device UDID.");
+	good = good && argParser.Register (kke::ArgHGindex, kke::ArgumentExist, "get-index", "HGin", "Device index.");
 	good = good && argParser.Register (kke::ArgHGadapters, kke::ArgumentExist, "get-adapters", "HGa", "Amount of device adapters.");
 	good = good && argParser.Register (kke::ArgHGbusLanes, kke::ArgumentExist, "get-bus-lanes", "HGbl", "PCI-E bus lanes.");
 	good = good && argParser.Register (kke::ArgHGbusLanesMax, kke::ArgumentExist, "get-bus-lanes-max", "HGblm", "Max PCI-E bus lanes.");

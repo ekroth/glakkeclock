@@ -138,6 +138,26 @@ void Device::CreateDevices(DeviceVector &devices)
 		device->adapters.push_back(Adapter(device, globalAdapters[i]));
 		devices.push_back(device);
 	}
+	
+	// Sort devices by UDID
+	// Bubble sort
+	bool bubbleChange = false;
+	do
+	{
+		for (uint i = 0; i < devices.size(); i++)
+		{
+			if (i + 1 < devices.size())
+			{
+				if (devices[i]->GetUDID() > devices[i + 1]->GetUDID())
+				{
+					bubbleChange = true;
+					Device *tmp = devices[i];
+					devices[i] = devices[i + 1];
+					devices[i + 1] = tmp;
+				}
+			}
+		}
+	} while (bubbleChange);
 }
 
 Device::Device(const string &udid, const string &name):
