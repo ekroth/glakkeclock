@@ -59,7 +59,6 @@ namespace kke
 	private:
 		const Adapter *adapter;
 		ADLDisplayInfo info;
-		
 		DiPixelFormat pixelFormat;
 	};
 	
@@ -72,14 +71,29 @@ namespace kke
 		Adapter(const Device *device, const AdapterInfo &info);
 		~Adapter();
 		
+		/**
+		 * @brief ID.
+		 **/
 		const AId& PollID(bool refresh = false);
+		
+		/**
+		 * @brief If active.
+		 **/
 		const AActive& PollActive(bool refresh = false);
 		
+		/**
+		 * @brief Information.
+		 *
+		 * @return const AdapterInfo&
+		 **/
 		const AdapterInfo &GetInfo() const;
 		
 		// Detect/Refresh displays.
-		
+		/**
+		 * @brief Forces all data to be repolled.
+		 **/
 		void ResetPolled();
+		
 	private:
 		const Device *device;
 		AdapterInfo info;
@@ -103,11 +117,16 @@ namespace kke
 	typedef PollData< std::vector<ADLODPerformanceLevel> > DPerfLvls;
 	typedef PollData<int> DDisplayCount;
   
+	/**
+	 * @brief Device manages Adapters and Displays, has one unique UDID.
+	 **/
 	class Device
 	{
 	public:
 		// Creates a vector of (dynamic) devices, with adapters.
 		static void CreateDevices(DeviceVector &devices);
+		
+	public:
 		
 		Device(const std::string &udid, const std::string &name);
 		~Device();

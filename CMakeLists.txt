@@ -40,7 +40,7 @@ ENDIF()
 
 ADD_DEFINITIONS("-Wall -DADLLOC='\"${ADL_LIBRARY}\"' -DVERSION='\"${KKE_VERSION}\"'")
 
-SET(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG")
+SET(CMAKE_CXX_FLAGS_DEBUG "-DDEBUG -g")
 SET(CMAKE_CXX_FLAGS_RELEASE "-DRELEASE -O3")
 SET(CMAKE_CXX_FLAGS_PROFILING "-pg -O0 -c")
 
@@ -51,8 +51,8 @@ FIND_PACKAGE(ADL REQUIRED)
 ADD_EXECUTABLE(
 ${KKE_BIN}
 
-src/ArgParser/ArgParser.cpp
-src/ArgParser/Argument.cpp
+src/IO/ArgParser.cpp
+src/IO/Argument.cpp
 
 src/main.cpp
 src/kkeADL.cpp

@@ -22,9 +22,6 @@
 #include "kkeADL.hpp"
 #include "Device.hpp"
 
-#include <stdlib.h>
-#include <dlfcn.h>
-#include <string.h>
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -48,12 +45,12 @@ int GlakkeClock::Execute (int argc, char** argv)
 		return 0;
 	
 	// After setting devices, we will have to clean afterwards.
-	argParser.SetToLower(true); // Ignore capital letters
+	ArgParser::Instance().CaseSense(false); // Ignore capital letters
 	if (!registerArgs())
 	{
 		cout << "Failed when registering arguments." << endl;
 	}
-	else if (!argParser.Process(argc, argv))
+	else if (!ArgParser::Instance().Process(argc, argv))
 	{
 		cout << "Failed when parsing arguments." << endl;
 	}
@@ -81,11 +78,11 @@ void GlakkeClock::output()
 	uint startDevice = 0, endDevice = devices.size();
 	
 	// --- Set device
-	if (argParser.Exist(kke::ArgCdeviceUdid))
+	if (ArgParser::Instance().Exist(kke::ArgCdeviceUdid))
 	{
 		bool exists = false;
 		for (uint i = 0; i < devices.size(); i++)
-			if (devices[i]->GetUDID().find(argParser.GetString(kke::ArgCdeviceUdid)) != string::npos)
+			if (devices[i]->GetUDID().find(ArgParser::Instance().GetString(kke::ArgCdeviceUdid)) != string::npos)
 			{
 				if (exists)
 				{
@@ -109,9 +106,9 @@ void GlakkeClock::output()
 			endDevice = 0;
 		}
 	}
-	else if (argParser.Exist(kke::ArgCdeviceIndex))
+	else if (ArgParser::Instance().Exist(kke::ArgCdeviceIndex))
 	{
-		uint specIndex = argParser.GetInt(kke::ArgCdeviceIndex);
+		uint specIndex = ArgParser::Instance().GetInt(kke::ArgCdeviceIndex);
 		if (specIndex >= devices.size())
 		{
 			cout << "Index out of range. Valid: " << '0' << '-' << (devices.size() - 1) << endl;
@@ -124,11 +121,11 @@ void GlakkeClock::output()
 			endDevice = specIndex + 1;
 		}
 	}
-	else if (argParser.Exist(kke::ArgCdeviceName))
+	else if (ArgParser::Instance().Exist(kke::ArgCdeviceName))
 	{
 		bool exists = false;
 		for (uint i = 0; i < devices.size(); i++)
-			if (devices[i]->GetName().find(argParser.GetString(kke::ArgCdeviceName)) != string::npos)
+			if (devices[i]->GetName().find(ArgParser::Instance().GetString(kke::ArgCdeviceName)) != string::npos)
 			{	// Use find, since AMD somehow felt like adding a space at the end of the name.
 				if (exists)
 				{
@@ -159,7 +156,7 @@ void GlakkeClock::output()
 		Device &device = *devices[i];
 		
 		// --- Big info
-		if (argParser.Exist(kke::ArgHGinfo) || argParser.Exist(kke::ArgHGinfoLevels))
+		if (ArgParser::Instance().Exist(kke::ArgHGinfo) || ArgParser::Instance().Exist(kke::ArgHGinfoLevels))
 		{
 			cout << "Name: " << device.GetName() << endl;
 			cout << "UDID: " << device.GetUDID() << endl;
@@ -209,7 +206,7 @@ void GlakkeClock::output()
 				cout << "Current Bus Speed: " <<  device.PollActivity().Data.iCurrentBusSpeed << endl;
 			}
 			
-			if (argParser.Exist(kke::ArgHGinfoLevels))
+			if (ArgParser::Instance().Exist(kke::ArgHGinfoLevels))
 			{
 				if (device.PollODParams().Valid && device.PollPerfLvls(false).Valid)
 				{
@@ -229,52 +226,52 @@ void GlakkeClock::output()
 			}
 		}
 		
-		if (argParser.Exist(kke::ArgHGname))
+		if (ArgParser::Instance().Exist(kke::ArgHGname))
 			cout << device.GetName() << endl;
 		
-		if (argParser.Exist(kke::ArgHGudid))
+		if (ArgParser::Instance().Exist(kke::ArgHGudid))
 			cout << device.GetUDID() << endl;
 		
-		if (argParser.Exist(kke::ArgHGindex))
+		if (ArgParser::Instance().Exist(kke::ArgHGindex))
 			cout << i << endl;
 		
-		if (argParser.Exist(kke::ArgHGadapters))
+		if (ArgParser::Instance().Exist(kke::ArgHGadapters))
 			cout << device.GetAdapters().size() << endl;
 		
 		
-		if (argParser.Exist(kke::ArgHGbusLanes))
+		if (ArgParser::Instance().Exist(kke::ArgHGbusLanes))
 			if (device.PollActivity().Valid)
 				cout << device.PollActivity().Data.iCurrentBusLanes << endl;
 		
-		if (argParser.Exist(kke::ArgHGbusLanesMax))
+		if (ArgParser::Instance().Exist(kke::ArgHGbusLanesMax))
 			if (device.PollActivity().Valid)
 				cout << device.PollActivity().Data.iMaximumBusLanes << endl;
 		
-		if (argParser.Exist(kke::ArgHGbusSpeed))
+		if (ArgParser::Instance().Exist(kke::ArgHGbusSpeed))
 			if (device.PollActivity().Valid)
 				cout << device.PollActivity().Data.iCurrentBusSpeed << endl;
 		
-		if (argParser.Exist(kke::ArgOGperfLevel))
+		if (ArgParser::Instance().Exist(kke::ArgOGperfLevel))
 			if (device.PollActivity().Valid)
 				cout << device.PollActivity().Data.iCurrentPerformanceLevel << endl;
 		
-		if (argParser.Exist(kke::ArgOGtemperature) && device.PollTemperature().Valid)
+		if (ArgParser::Instance().Exist(kke::ArgOGtemperature) && device.PollTemperature().Valid)
 			cout << device.PollTemperature().Data / 1000 << endl;
 		
-		if (argParser.Exist(kke::ArgOGactivity) && device.PollActivity().Valid)
+		if (ArgParser::Instance().Exist(kke::ArgOGactivity) && device.PollActivity().Valid)
 			cout << device.PollActivity().Data.iActivityPercent << endl;
 		
-		if (argParser.Exist(kke::ArgOGclocksGpu) && device.PollActivity().Valid)
+		if (ArgParser::Instance().Exist(kke::ArgOGclocksGpu) && device.PollActivity().Valid)
 			cout << device.PollActivity().Data.iEngineClock / 100 << endl;
 		
-		if (argParser.Exist(kke::ArgOGclocksMem) && device.PollActivity().Valid)
+		if (ArgParser::Instance().Exist(kke::ArgOGclocksMem) && device.PollActivity().Valid)
 			cout << device.PollActivity().Data.iMemoryClock / 100 << endl;
 		
-		if (argParser.Exist(kke::ArgOGclocksVddc) && device.PollActivity().Valid)
+		if (ArgParser::Instance().Exist(kke::ArgOGclocksVddc) && device.PollActivity().Valid)
 			cout << device.PollActivity().Data.iVddc << endl;
 		
 		// Fan
-		if (argParser.Exist(kke::ArgOGfanType))
+		if (ArgParser::Instance().Exist(kke::ArgOGfanType))
 		{
 			if (device.PollFanSpeed().Valid && device.PollFanInfo().Valid)
 			{
@@ -285,33 +282,33 @@ void GlakkeClock::output()
 			}
 		}
 		
-		if (argParser.Exist(kke::ArgOGfan))
+		if (ArgParser::Instance().Exist(kke::ArgOGfan))
 		{
 			if (device.PollFanSpeed().Valid && device.PollFanInfo().Valid)
 			{
-				if (argParser.GetString(kke::ArgOCfanType, "Percent") == "RPM")
+				if (ArgParser::Instance().GetString(kke::ArgOCfanType, "Percent") == "RPM")
 					cout << device.PollFanSpeed().Data.iFanSpeed << endl;
 				else // Calculate percentage
 					cout << (int)((float)device.PollFanSpeed().Data.iFanSpeed / device.PollFanInfo().Data.iMaxRPM * 100.0f) << endl;
 			}
 		}
 		
-		if (argParser.Exist(kke::ArgOGfanMin))
+		if (ArgParser::Instance().Exist(kke::ArgOGfanMin))
 		{
 			if (device.PollFanSpeed().Valid && device.PollFanInfo().Valid)
 			{
-				if (argParser.GetString(kke::ArgOCfanType, "Percent") == "RPM")
+				if (ArgParser::Instance().GetString(kke::ArgOCfanType, "Percent") == "RPM")
 					cout << device.PollFanInfo().Data.iMinRPM << endl;
 				else
 					cout << device.PollFanInfo().Data.iMinPercent << endl;
 			}
 		}
 		
-		if (argParser.Exist(kke::ArgOGfanMax))
+		if (ArgParser::Instance().Exist(kke::ArgOGfanMax))
 		{
 			if (device.PollFanSpeed().Valid && device.PollFanInfo().Valid)
 			{
-				if (argParser.GetString(kke::ArgOCfanType, "Percent") == "RPM")
+				if (ArgParser::Instance().GetString(kke::ArgOCfanType, "Percent") == "RPM")
 					cout << device.PollFanInfo().Data.iMaxRPM << endl;
 				else
 					cout << device.PollFanInfo().Data.iMaxPercent << endl;
@@ -320,10 +317,10 @@ void GlakkeClock::output()
 
 		
 		// --- Overclocking
-		if (argParser.Exist(kke::ArgOSclocksGpu) || argParser.Exist(kke::ArgOSclocksMem) || argParser.Exist(kke::ArgOSclocksVddc) 
-		|| argParser.Exist(kke::ArgOSfan) || argParser.Exist(kke::ArgOSfanReset)
-		|| argParser.Exist(kke::ArgOSclocksGpuReset) || argParser.Exist(kke::ArgOSclocksMemReset) || argParser.Exist(kke::ArgOSclocksVddcReset)
-		|| argParser.Exist(kke::ArgOSclocksReset))
+		if (ArgParser::Instance().Exist(kke::ArgOSclocksGpu) || ArgParser::Instance().Exist(kke::ArgOSclocksMem) || ArgParser::Instance().Exist(kke::ArgOSclocksVddc) 
+		|| ArgParser::Instance().Exist(kke::ArgOSfan) || ArgParser::Instance().Exist(kke::ArgOSfanReset)
+		|| ArgParser::Instance().Exist(kke::ArgOSclocksGpuReset) || ArgParser::Instance().Exist(kke::ArgOSclocksMemReset) || ArgParser::Instance().Exist(kke::ArgOSclocksVddcReset)
+		|| ArgParser::Instance().Exist(kke::ArgOSclocksReset))
 		{
 			if (startDevice != endDevice - 1)
 			{
@@ -332,9 +329,9 @@ void GlakkeClock::output()
 			}
 			
 			{
-				int tmpGpu = argParser.GetInt(kke::ArgOSclocksGpu, 0) * 100, 
-					tmpMem = argParser.GetInt(kke::ArgOSclocksMem, 0) * 100, 
-					tmpVddc = argParser.GetInt(kke::ArgOSclocksVddc, 0);
+				int tmpGpu = ArgParser::Instance().GetInt(kke::ArgOSclocksGpu, 0) * 100, 
+					tmpMem = ArgParser::Instance().GetInt(kke::ArgOSclocksMem, 0) * 100, 
+					tmpVddc = ArgParser::Instance().GetInt(kke::ArgOSclocksVddc, 0);
 					
 				if (device.PollODParams().Valid)
 				{
@@ -361,7 +358,7 @@ void GlakkeClock::output()
 							cout << "Error when setting clocks/vddc." << endl;
 				}
 
-				if (argParser.Exist(kke::ArgOSclocksReset)  || argParser.Exist(kke::ArgOSallReset))
+				if (ArgParser::Instance().Exist(kke::ArgOSclocksReset)  || ArgParser::Instance().Exist(kke::ArgOSallReset))
 				{
 					if (device.PollPerfLvls(true).Valid)
 					{
@@ -373,34 +370,34 @@ void GlakkeClock::output()
 		}
 
 		// --- Fan
-		if (argParser.Exist(kke::ArgOSfan))
+		if (ArgParser::Instance().Exist(kke::ArgOSfan))
 		{
 			if (device.PollFanInfo().Valid && device.PollFanSpeed().Valid)
 			{
-				if (argParser.GetString(kke::ArgOCfanType, "Percent") == "Percent")
+				if (ArgParser::Instance().GetString(kke::ArgOCfanType, "Percent") == "Percent")
 				{
-					if (argParser.GetInt(kke::ArgOSfan) < device.PollFanInfo().Data.iMinPercent || argParser.GetInt(kke::ArgOSfan) > device.PollFanInfo().Data.iMaxPercent)
+					if (ArgParser::Instance().GetInt(kke::ArgOSfan) < device.PollFanInfo().Data.iMinPercent || ArgParser::Instance().GetInt(kke::ArgOSfan) > device.PollFanInfo().Data.iMaxPercent)
 						cout << "Fan value is incorrect. Valid are (PERCENT): " << device.PollFanInfo().Data.iMinPercent << "-" << device.PollFanInfo().Data.iMaxPercent << endl;
 					else
 					{
-						if (!device.ODSetFan(argParser.GetInt(kke::ArgOSfan), ADL_DL_FANCTRL_SPEED_TYPE_PERCENT))
+						if (!device.ODSetFan(ArgParser::Instance().GetInt(kke::ArgOSfan), ADL_DL_FANCTRL_SPEED_TYPE_PERCENT))
 							cout << "Setting fan speed failed (PERCENT)." << endl;
 					}
 				}
 				else // RPM
 				{
-					if (argParser.GetInt(kke::ArgOSfan) < device.PollFanInfo().Data.iMinRPM || argParser.GetInt(kke::ArgOSfan) > device.PollFanInfo().Data.iMaxRPM)
+					if (ArgParser::Instance().GetInt(kke::ArgOSfan) < device.PollFanInfo().Data.iMinRPM || ArgParser::Instance().GetInt(kke::ArgOSfan) > device.PollFanInfo().Data.iMaxRPM)
 						cout << "Fan value is invalid. Valid are (RPM): " << device.PollFanInfo().Data.iMinRPM << "-" << device.PollFanInfo().Data.iMaxRPM << endl;
 					else
 					{
-						if (!device.ODSetFan(argParser.GetInt(kke::ArgOSfan), ADL_DL_FANCTRL_SPEED_TYPE_RPM))
+						if (!device.ODSetFan(ArgParser::Instance().GetInt(kke::ArgOSfan), ADL_DL_FANCTRL_SPEED_TYPE_RPM))
 							cout << "Setting fan speed failed (RPM)." << endl;
 					}
 				}
 			}
 		}
 	
-		if (argParser.Exist(kke::ArgOSfanReset) || argParser.Exist(kke::ArgOSallReset))
+		if (ArgParser::Instance().Exist(kke::ArgOSfanReset) || ArgParser::Instance().Exist(kke::ArgOSallReset))
 		{
 			// Set default fan
 			if (!device.ODSetFanDefault())
@@ -409,12 +406,12 @@ void GlakkeClock::output()
 		
 		// Display
 	
-		if (argParser.Exist(kke::ArgDGConDisplays) || argParser.Exist(kke::ArgDGMapDisplays) || argParser.Exist(kke::ArgDGAllDisplays))
+		if (ArgParser::Instance().Exist(kke::ArgDGConDisplays) || ArgParser::Instance().Exist(kke::ArgDGMapDisplays) || ArgParser::Instance().Exist(kke::ArgDGAllDisplays))
 		{
 			for (kke::DisplayVector::iterator disp = device.GetDisplays().begin(); disp != device.GetDisplays().end(); disp++)
 			{			
-				if (argParser.Exist(kke::ArgDGAllDisplays) || (disp->IsConnected() && argParser.Exist(kke::ArgDGConDisplays)) ||
-					(disp->IsMapped() && argParser.Exist(kke::ArgDGMapDisplays)))
+				if (ArgParser::Instance().Exist(kke::ArgDGAllDisplays) || (disp->IsConnected() && ArgParser::Instance().Exist(kke::ArgDGConDisplays)) ||
+					(disp->IsMapped() && ArgParser::Instance().Exist(kke::ArgDGMapDisplays)))
 				{					
 					cout << "Name: " << disp->GetInfo().strDisplayName << endl;
 					cout << "Manufacturer: " << disp->GetInfo().strDisplayManufacturerName << endl;
@@ -429,13 +426,13 @@ void GlakkeClock::output()
 	
 	// --- Help
 	
-	if (argParser.Exist(kke::ArgHelp))
+	if (ArgParser::Instance().Exist(kke::ArgHelp))
 	{
-		for (int i = 0; argParser.Registered(i); i++)
+		for (int i = 0; ArgParser::Instance().Registered(i); i++)
 		{
 			const int col1 = 1, col2 = 7, col3 = 25;
 
-			alignArg("-" + argParser.GetsName(i), "--" + argParser.GetlName(i), argParser.GetInfo(i), col1, col2, col3);
+			alignArg("-" + ArgParser::Instance().GetsName(i), "--" + ArgParser::Instance().GetlName(i), ArgParser::Instance().GetInfo(i), col1, col2, col3);
 			
 			switch (i + 1)
 			{
@@ -482,7 +479,7 @@ void GlakkeClock::output()
 		}
 	}
 	
-	if (argParser.Exist(kke::ArgVersion))
+	if (ArgParser::Instance().Exist(kke::ArgVersion))
 	{
 		cout << VERSION << endl;
 	}
@@ -496,61 +493,61 @@ bool GlakkeClock::registerArgs()
 	bool good = true;
 
 	// Program
-	good = good && argParser.Register (kke::ArgHelp, kke::ArgumentExist, "help", "h", "Help dialog.");
-	good = good && argParser.Register (kke::ArgVersion, kke::ArgumentExist, "version", "v", "Version.");
+	good = good && ArgParser::Instance().Register (kke::ArgHelp, kke::ArgumentExist, "help", "h", "Help dialog.");
+	good = good && ArgParser::Instance().Register (kke::ArgVersion, kke::ArgumentExist, "version", "v", "Version.");
 
 	// Device options
-// 	good = good && argParser.Register (kke::ArgCdevice, kke::ArgumentInt, "device", "Cd", "Choose device by number.");
-	good = good && argParser.Register (kke::ArgCdeviceName, kke::ArgumentString, "device-name", "Cdn", "Choose device by name. (Not for Crossfire)");
-	good = good && argParser.Register (kke::ArgCdeviceUdid, kke::ArgumentString, "device-udid", "Cdu", "Choose device by UDID.");
-	good = good && argParser.Register (kke::ArgCdeviceIndex, kke::ArgumentInt, "device-index", "Cdi", "Choose device by index.");
-	good = good && argParser.Register (kke::ArgCperfLevel, kke::ArgumentInt, "perf-level", "Cpl", "Choose performance level.");
+// 	good = good && ArgParser::Instance().Register (kke::ArgCdevice, kke::ArgumentInt, "device", "Cd", "Choose device by number.");
+	good = good && ArgParser::Instance().Register (kke::ArgCdeviceName, kke::ArgumentString, "device-name", "Cdn", "Choose device by name. (Not for Crossfire)");
+	good = good && ArgParser::Instance().Register (kke::ArgCdeviceUdid, kke::ArgumentString, "device-udid", "Cdu", "Choose device by UDID.");
+	good = good && ArgParser::Instance().Register (kke::ArgCdeviceIndex, kke::ArgumentInt, "device-index", "Cdi", "Choose device by index.");
+	good = good && ArgParser::Instance().Register (kke::ArgCperfLevel, kke::ArgumentInt, "perf-level", "Cpl", "Choose performance level.");
 
 	// Hardware info
-	good = good && argParser.Register (kke::ArgHGinfo, kke::ArgumentExist, "get-info", "HGi", "Device information.");
-	good = good && argParser.Register (kke::ArgHGinfoLevels, kke::ArgumentExist, "get-info-levels", "HGil", "Extended device information.");
-	good = good && argParser.Register (kke::ArgHGname, kke::ArgumentExist, "get-name", "HGn", "Device name.");
-	good = good && argParser.Register (kke::ArgHGudid, kke::ArgumentExist, "get-udid", "HGu", "Device UDID.");
-	good = good && argParser.Register (kke::ArgHGindex, kke::ArgumentExist, "get-index", "HGin", "Device index.");
-	good = good && argParser.Register (kke::ArgHGadapters, kke::ArgumentExist, "get-adapters", "HGa", "Amount of device adapters.");
-	good = good && argParser.Register (kke::ArgHGbusLanes, kke::ArgumentExist, "get-bus-lanes", "HGbl", "PCI-E bus lanes.");
-	good = good && argParser.Register (kke::ArgHGbusLanesMax, kke::ArgumentExist, "get-bus-lanes-max", "HGblm", "Max PCI-E bus lanes.");
-	good = good && argParser.Register (kke::ArgHGbusSpeed, kke::ArgumentExist, "get-bus-speed", "HGbs", "PCI-E bus speed.");
+	good = good && ArgParser::Instance().Register (kke::ArgHGinfo, kke::ArgumentExist, "get-info", "HGi", "Device information.");
+	good = good && ArgParser::Instance().Register (kke::ArgHGinfoLevels, kke::ArgumentExist, "get-info-levels", "HGil", "Extended device information.");
+	good = good && ArgParser::Instance().Register (kke::ArgHGname, kke::ArgumentExist, "get-name", "HGn", "Device name.");
+	good = good && ArgParser::Instance().Register (kke::ArgHGudid, kke::ArgumentExist, "get-udid", "HGu", "Device UDID.");
+	good = good && ArgParser::Instance().Register (kke::ArgHGindex, kke::ArgumentExist, "get-index", "HGin", "Device index.");
+	good = good && ArgParser::Instance().Register (kke::ArgHGadapters, kke::ArgumentExist, "get-adapters", "HGa", "Amount of device adapters.");
+	good = good && ArgParser::Instance().Register (kke::ArgHGbusLanes, kke::ArgumentExist, "get-bus-lanes", "HGbl", "PCI-E bus lanes.");
+	good = good && ArgParser::Instance().Register (kke::ArgHGbusLanesMax, kke::ArgumentExist, "get-bus-lanes-max", "HGblm", "Max PCI-E bus lanes.");
+	good = good && ArgParser::Instance().Register (kke::ArgHGbusSpeed, kke::ArgumentExist, "get-bus-speed", "HGbs", "PCI-E bus speed.");
 
 	// Device varying info
-	good = good && argParser.Register (kke::ArgOGperfLevel, kke::ArgumentExist, "get-perf-level", "OGpl", "Performance level.");
-	good = good && argParser.Register (kke::ArgOGclocksGpu, kke::ArgumentExist, "get-clocks-gpu", "OGcg", "GPU speed (MHz).");
-	good = good && argParser.Register (kke::ArgOGclocksMem, kke::ArgumentExist, "get-clocks-mem", "OGcm", "Memory speed (MHz).");
-	good = good && argParser.Register (kke::ArgOGclocksVddc, kke::ArgumentExist, "get-clocks-vddc", "OGcv", "VDDC voltage (mV).");
-	good = good && argParser.Register (kke::ArgOGactivity, kke::ArgumentExist, "get-gpu-activity", "OGga", "GPU activity (%).");
-	good = good && argParser.Register (kke::ArgOGtemperature, kke::ArgumentExist, "get-gpu-temp", "OGgt", "GPU temperature (C).");
+	good = good && ArgParser::Instance().Register (kke::ArgOGperfLevel, kke::ArgumentExist, "get-perf-level", "OGpl", "Performance level.");
+	good = good && ArgParser::Instance().Register (kke::ArgOGclocksGpu, kke::ArgumentExist, "get-clocks-gpu", "OGcg", "GPU speed (MHz).");
+	good = good && ArgParser::Instance().Register (kke::ArgOGclocksMem, kke::ArgumentExist, "get-clocks-mem", "OGcm", "Memory speed (MHz).");
+	good = good && ArgParser::Instance().Register (kke::ArgOGclocksVddc, kke::ArgumentExist, "get-clocks-vddc", "OGcv", "VDDC voltage (mV).");
+	good = good && ArgParser::Instance().Register (kke::ArgOGactivity, kke::ArgumentExist, "get-gpu-activity", "OGga", "GPU activity (%).");
+	good = good && ArgParser::Instance().Register (kke::ArgOGtemperature, kke::ArgumentExist, "get-gpu-temp", "OGgt", "GPU temperature (C).");
 
 	// Device fan
-	good = good && argParser.Register (kke::ArgOCfanType, kke::ArgumentString, "fan-type", "OCft", "Choose fan type (RPM, Percent (default)).");
-	good = good && argParser.Register (kke::ArgOGfanType, kke::ArgumentExist, "get-fan-type", "OGft", "Fan type (RPM, percent).");
-	good = good && argParser.Register (kke::ArgOGfan, kke::ArgumentExist, "get-fan", "OGf", "Fan speed.");
-	good = good && argParser.Register (kke::ArgOGfanMin, kke::ArgumentExist, "get-fan-min", "OGfmi", "Minimum fan speed.");
-	good = good && argParser.Register (kke::ArgOGfanMax, kke::ArgumentExist, "get-fan-max", "OGfma", "Maximum fan speed.");
-	good = good && argParser.Register (kke::ArgOSfan, kke::ArgumentInt, "set-fan", "OSf", "Set fan speed, recommend Percent (default) type.");
+	good = good && ArgParser::Instance().Register (kke::ArgOCfanType, kke::ArgumentString, "fan-type", "OCft", "Choose fan type (RPM, Percent (default)).");
+	good = good && ArgParser::Instance().Register (kke::ArgOGfanType, kke::ArgumentExist, "get-fan-type", "OGft", "Fan type (RPM, percent).");
+	good = good && ArgParser::Instance().Register (kke::ArgOGfan, kke::ArgumentExist, "get-fan", "OGf", "Fan speed.");
+	good = good && ArgParser::Instance().Register (kke::ArgOGfanMin, kke::ArgumentExist, "get-fan-min", "OGfmi", "Minimum fan speed.");
+	good = good && ArgParser::Instance().Register (kke::ArgOGfanMax, kke::ArgumentExist, "get-fan-max", "OGfma", "Maximum fan speed.");
+	good = good && ArgParser::Instance().Register (kke::ArgOSfan, kke::ArgumentInt, "set-fan", "OSf", "Set fan speed, recommend Percent (default) type.");
 
 	// Set device values. (capital S to avoid typo).
-	good = good && argParser.Register (kke::ArgOSclocksGpu, kke::ArgumentInt, "set-clocks-gpu", "OScg", "Set GPU speed (MHz).");
-	good = good && argParser.Register (kke::ArgOSclocksMem, kke::ArgumentInt, "set-clocks-mem", "OScm", "Set Memory speed (MHz).");
-	good = good && argParser.Register (kke::ArgOSclocksVddc, kke::ArgumentInt, "set-clocks-vddc", "OScv", "Set VDDC voltage (mV).");
+	good = good && ArgParser::Instance().Register (kke::ArgOSclocksGpu, kke::ArgumentInt, "set-clocks-gpu", "OScg", "Set GPU speed (MHz).");
+	good = good && ArgParser::Instance().Register (kke::ArgOSclocksMem, kke::ArgumentInt, "set-clocks-mem", "OScm", "Set Memory speed (MHz).");
+	good = good && ArgParser::Instance().Register (kke::ArgOSclocksVddc, kke::ArgumentInt, "set-clocks-vddc", "OScv", "Set VDDC voltage (mV).");
 	// Set reset
-	good = good && argParser.Register (kke::ArgOSfanReset, kke::ArgumentExist, "set-fan-reset", "OSfr", "Reset fan speed.");
-	good = good && argParser.Register (kke::ArgOSclocksGpuReset, kke::ArgumentExist, "set-clocks-gpu-reset", "OScgr", "Reset GPU clocks.");
-	good = good && argParser.Register (kke::ArgOSclocksMemReset, kke::ArgumentExist, "set-clocks-mem-reset", "OScmr", "Reset Memory clocks.");
-	good = good && argParser.Register (kke::ArgOSclocksVddcReset, kke::ArgumentExist, "set-clocks-vddc-reset", "OScvr", "Reset VDDC voltage.");
-	good = good && argParser.Register (kke::ArgOSclocksReset, kke::ArgumentExist, "set-clocks-reset", "OScr", "Reset all clocks.");
-	good = good && argParser.Register (kke::ArgOSallReset, kke::ArgumentExist, "set-all-reset", "OSar", "Reset clocks and fan.");
+	good = good && ArgParser::Instance().Register (kke::ArgOSfanReset, kke::ArgumentExist, "set-fan-reset", "OSfr", "Reset fan speed.");
+	good = good && ArgParser::Instance().Register (kke::ArgOSclocksGpuReset, kke::ArgumentExist, "set-clocks-gpu-reset", "OScgr", "Reset GPU clocks.");
+	good = good && ArgParser::Instance().Register (kke::ArgOSclocksMemReset, kke::ArgumentExist, "set-clocks-mem-reset", "OScmr", "Reset Memory clocks.");
+	good = good && ArgParser::Instance().Register (kke::ArgOSclocksVddcReset, kke::ArgumentExist, "set-clocks-vddc-reset", "OScvr", "Reset VDDC voltage.");
+	good = good && ArgParser::Instance().Register (kke::ArgOSclocksReset, kke::ArgumentExist, "set-clocks-reset", "OScr", "Reset all clocks.");
+	good = good && ArgParser::Instance().Register (kke::ArgOSallReset, kke::ArgumentExist, "set-all-reset", "OSar", "Reset clocks and fan.");
 	
 	// Display	
-// 	good = good && argParser.Register(kke::ArgDGPixelFormat, kke::ArgumentExist, "get-pixel-format", "DGpf", "Pixel format (HDMI).");
-// 	good = good && argParser.Register(kke::ArgDSPixelFormat, kke::ArgumentString, "set-pixel-format", "DSpf", "Pixel format (HDMI).");
-	good = good && argParser.Register(kke::ArgDGConDisplays, kke::ArgumentExist, "get-con-displays", "DGcd", "Show connected displays.");
-	good = good && argParser.Register(kke::ArgDGMapDisplays, kke::ArgumentExist, "get-map-displays", "DGmd", "Show used/mapped displays.");
-	good = good && argParser.Register(kke::ArgDGAllDisplays, kke::ArgumentExist, "get-all-displays", "DGad", "Show all displays.");
+// 	good = good && ArgParser::Instance().Register(kke::ArgDGPixelFormat, kke::ArgumentExist, "get-pixel-format", "DGpf", "Pixel format (HDMI).");
+// 	good = good && ArgParser::Instance().Register(kke::ArgDSPixelFormat, kke::ArgumentString, "set-pixel-format", "DSpf", "Pixel format (HDMI).");
+	good = good && ArgParser::Instance().Register(kke::ArgDGConDisplays, kke::ArgumentExist, "get-con-displays", "DGcd", "Show connected displays.");
+	good = good && ArgParser::Instance().Register(kke::ArgDGMapDisplays, kke::ArgumentExist, "get-map-displays", "DGmd", "Show used/mapped displays.");
+	good = good && ArgParser::Instance().Register(kke::ArgDGAllDisplays, kke::ArgumentExist, "get-all-displays", "DGad", "Show all displays.");
 
 	return good;
 }

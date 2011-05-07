@@ -205,6 +205,7 @@ const kke::DTemperature& Device::PollTemperature(bool refresh)
 	if (!temperature.Valid || refresh)
 	{
 		ADLTemperature temp;
+		temp.iSize = sizeof(ADLTemperature);
 		temperature.Valid = ADLManager::ADL_Overdrive5_Temperature_Get(adapterIndexDefault, thermalControlDefault, &temp);
 		temperature.Data = temp.iTemperature;
 	}

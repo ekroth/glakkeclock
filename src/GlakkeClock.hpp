@@ -18,7 +18,7 @@
     along with GlakkeClock.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "ArgParser/ArgParser.hpp"
+#include "IO/ArgParser.hpp"
 
 #include <ADL/adl_sdk.h>
 
@@ -96,10 +96,7 @@ namespace kke
 		bool registerArgs();
 		
 		void output();
-// 		void handleArgs(int argc, char** argv);
 		
-		// align argument (-h, --help) to look nicer
 		void alignArg(const std::string &first, const std::string &second, const std::string& third, uint col1, uint col2, uint col3) const;
-		ArgParser argParser;
 	};
 }
