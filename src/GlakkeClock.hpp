@@ -34,6 +34,7 @@ namespace kke
 	{
 		ArgHelp,
 		ArgVersion,
+		ArgDebug,
 		
 // 		ArgCdevice,
 		ArgCdeviceName,

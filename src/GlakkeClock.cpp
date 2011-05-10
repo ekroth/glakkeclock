@@ -67,6 +67,8 @@ int GlakkeClock::Execute (int argc, char** argv)
 
 void GlakkeClock::output()
 {
+	if (ArgParser::Instance().Exist(kke::ArgDebug))
+		ADLManager::SetOutputErrors(true);
 	kke::DeviceVector devices;
 	Device::CreateDevices(devices);
 	
@@ -495,6 +497,7 @@ bool GlakkeClock::registerArgs()
 	// Program
 	good = good && ArgParser::Instance().Register (kke::ArgHelp, kke::ArgumentExist, "help", "h", "Help dialog.");
 	good = good && ArgParser::Instance().Register (kke::ArgVersion, kke::ArgumentExist, "version", "v", "Version.");
+	good = good && ArgParser::Instance().Register (kke::ArgDebug, kke::ArgumentExist, "debug", "d", "Output debug messages.");
 
 	// Device options
 // 	good = good && ArgParser::Instance().Register (kke::ArgCdevice, kke::ArgumentInt, "device", "Cd", "Choose device by number.");
