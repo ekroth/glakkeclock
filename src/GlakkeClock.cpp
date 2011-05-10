@@ -228,6 +228,7 @@ void GlakkeClock::output()
 			}
 		}
 		
+		// Device info
 		if (ArgParser::Instance().Exist(kke::ArgHGname))
 			cout << device.GetName() << endl;
 		
@@ -237,9 +238,17 @@ void GlakkeClock::output()
 		if (ArgParser::Instance().Exist(kke::ArgHGindex))
 			cout << i << endl;
 		
+		if (ArgParser::Instance().Exist(kke::ArgHGpart))
+			cout << device.PollBios().Data.strPartNumber << endl;
+		
+		if (ArgParser::Instance().Exist(kke::ArgHGversion))
+			cout << device.PollBios().Data.strVersion << endl;
+		
+		if (ArgParser::Instance().Exist(kke::ArgHGdate))
+			cout << device.PollBios().Data.strDate << endl;
+		
 		if (ArgParser::Instance().Exist(kke::ArgHGadapters))
 			cout << device.GetAdapters().size() << endl;
-		
 		
 		if (ArgParser::Instance().Exist(kke::ArgHGbusLanes))
 			if (device.PollActivity().Valid)
@@ -253,6 +262,7 @@ void GlakkeClock::output()
 			if (device.PollActivity().Valid)
 				cout << device.PollActivity().Data.iCurrentBusSpeed << endl;
 		
+		// Overdrive
 		if (ArgParser::Instance().Exist(kke::ArgOGperfLevel))
 			if (device.PollActivity().Valid)
 				cout << device.PollActivity().Data.iCurrentPerformanceLevel << endl;
@@ -432,7 +442,7 @@ void GlakkeClock::output()
 	{
 		const int col1 = 1, col2 = 7, col3 = 25;
 		
-		alignArg("- SYNOPSIS", "", "", col1, col2, col3);
+// 		alignArg("- SYNOPSIS", "", "", col1, col2, col3);
 		
 		
 		for (int i = 0; ArgParser::Instance().Registered(i); i++)
@@ -507,7 +517,7 @@ bool GlakkeClock::registerArgs()
 	good = good && ArgParser::Instance().Register (kke::ArgCdeviceName, kke::ArgumentString, "device-name", "Cdn", "Choose device by name. (Not for Crossfire)");
 	good = good && ArgParser::Instance().Register (kke::ArgCdeviceUdid, kke::ArgumentString, "device-udid", "Cdu", "Choose device by UDID.");
 	good = good && ArgParser::Instance().Register (kke::ArgCdeviceIndex, kke::ArgumentInt, "device-index", "Cdi", "Choose device by index.");
-	good = good && ArgParser::Instance().Register (kke::ArgCperfLevel, kke::ArgumentInt, "perf-level", "Cpl", "Choose performance level. (Used?)");
+	good = good && ArgParser::Instance().Register (kke::ArgCperfLevel, kke::ArgumentInt, "perf-level", "Cpl", "Choose performance level. (WIP, for poll Hz.)");
 
 	// Hardware info
 	good = good && ArgParser::Instance().Register (kke::ArgHGinfo, kke::ArgumentExist, "get-info", "HGi", "Device information.");
@@ -515,6 +525,9 @@ bool GlakkeClock::registerArgs()
 	good = good && ArgParser::Instance().Register (kke::ArgHGname, kke::ArgumentExist, "get-name", "HGn", "Device name.");
 	good = good && ArgParser::Instance().Register (kke::ArgHGudid, kke::ArgumentExist, "get-udid", "HGu", "Device UDID.");
 	good = good && ArgParser::Instance().Register (kke::ArgHGindex, kke::ArgumentExist, "get-index", "HGin", "Device index.");
+	good = good && ArgParser::Instance().Register (kke::ArgHGpart, kke::ArgumentExist, "get-part", "HGp", "Device part number.");
+	good = good && ArgParser::Instance().Register (kke::ArgHGversion, kke::ArgumentExist, "get-version", "HGv", "Device version.");
+	good = good && ArgParser::Instance().Register (kke::ArgHGdate, kke::ArgumentExist, "get-date", "HGd", "Device date.");
 	good = good && ArgParser::Instance().Register (kke::ArgHGadapters, kke::ArgumentExist, "get-adapters", "HGa", "Amount of device adapters.");
 	good = good && ArgParser::Instance().Register (kke::ArgHGbusLanes, kke::ArgumentExist, "get-bus-lanes", "HGbl", "PCI-E bus lanes.");
 	good = good && ArgParser::Instance().Register (kke::ArgHGbusLanesMax, kke::ArgumentExist, "get-bus-lanes-max", "HGblm", "Max PCI-E bus lanes.");

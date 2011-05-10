@@ -36,7 +36,6 @@ namespace kke
 		ArgVersion,
 		ArgDebug,
 		
-// 		ArgCdevice,
 		ArgCdeviceName,
 		ArgCdeviceUdid,
 		ArgCdeviceIndex,
@@ -48,6 +47,9 @@ namespace kke
 		ArgHGname,
 		ArgHGudid,
 		ArgHGindex,
+		ArgHGpart,
+		ArgHGversion,
+		ArgHGdate,
 		ArgHGadapters,
 		ArgHGbusLanes,
 		ArgHGbusLanesMax,
