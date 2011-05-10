@@ -430,9 +430,13 @@ void GlakkeClock::output()
 	
 	if (ArgParser::Instance().Exist(kke::ArgHelp))
 	{
+		const int col1 = 1, col2 = 7, col3 = 25;
+		
+		alignArg("- SYNOPSIS", "", "", col1, col2, col3);
+		
+		
 		for (int i = 0; ArgParser::Instance().Registered(i); i++)
 		{
-			const int col1 = 1, col2 = 7, col3 = 25;
 
 			alignArg("-" + ArgParser::Instance().GetsName(i), "--" + ArgParser::Instance().GetlName(i), ArgParser::Instance().GetInfo(i), col1, col2, col3);
 			
@@ -500,11 +504,10 @@ bool GlakkeClock::registerArgs()
 	good = good && ArgParser::Instance().Register (kke::ArgDebug, kke::ArgumentExist, "debug", "d", "Output debug messages.");
 
 	// Device options
-// 	good = good && ArgParser::Instance().Register (kke::ArgCdevice, kke::ArgumentInt, "device", "Cd", "Choose device by number.");
 	good = good && ArgParser::Instance().Register (kke::ArgCdeviceName, kke::ArgumentString, "device-name", "Cdn", "Choose device by name. (Not for Crossfire)");
 	good = good && ArgParser::Instance().Register (kke::ArgCdeviceUdid, kke::ArgumentString, "device-udid", "Cdu", "Choose device by UDID.");
 	good = good && ArgParser::Instance().Register (kke::ArgCdeviceIndex, kke::ArgumentInt, "device-index", "Cdi", "Choose device by index.");
-	good = good && ArgParser::Instance().Register (kke::ArgCperfLevel, kke::ArgumentInt, "perf-level", "Cpl", "Choose performance level.");
+	good = good && ArgParser::Instance().Register (kke::ArgCperfLevel, kke::ArgumentInt, "perf-level", "Cpl", "Choose performance level. (Used?)");
 
 	// Hardware info
 	good = good && ArgParser::Instance().Register (kke::ArgHGinfo, kke::ArgumentExist, "get-info", "HGi", "Device information.");

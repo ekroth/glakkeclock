@@ -147,7 +147,9 @@ bool ArgParser::Process(int argc, char **argv)
 		if (!validArg)
 		{
 			// LOG
-			continue;
+			cout << "Invalid argument: " << current << endl;
+			return false;
+// 			continue;
 		}
 		
 		Argument &arg = argMap.find(argId)->second;
@@ -208,7 +210,7 @@ bool ArgParser::Register(int id, kke::ArgumentType type, const std::string& lNam
 {
 	bool isGood = true;
 	
-#if DEBUG
+// #if DEBUG
 	
 	for (ArgMap::const_iterator it = argMap.begin(); it != argMap.end(); it++)
 	{
@@ -247,7 +249,7 @@ bool ArgParser::Register(int id, kke::ArgumentType type, const std::string& lNam
 		}
 	}
 	
-#endif
+// #endif
 	
 	argMap[id] = Argument(type, lName, sName, info);
 	return isGood;

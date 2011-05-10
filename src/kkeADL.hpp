@@ -18,6 +18,8 @@
     along with GlakkeClock.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// TODO: Make it a singleton, not total static.
+
 #ifndef KKEADL_HPP
 #define KKEADL_HPP
 
