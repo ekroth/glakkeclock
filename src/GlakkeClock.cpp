@@ -21,6 +21,7 @@
 #include "GlakkeClock.hpp"
 #include "kkeADL.hpp"
 #include "Device.hpp"
+#include "Debug/Logger.hpp"
 
 #include <string>
 #include <iostream>
@@ -40,35 +41,51 @@ int GlakkeClock::Execute (int argc, char** argv)
 	cout << "By Andrée 'Glaucous' Ekroth, 2011" << endl << endl;
 #endif
 
-	// Initialize ADL
-	if (!ADLManager::Init())
-		return 0;
-	
 	// After setting devices, we will have to clean afterwards.
 	ArgParser::Instance().CaseSense(false); // Ignore capital letters
 	if (!registerArgs())
 	{
-		cout << "Failed when registering arguments." << endl;
+		LOGGROUP(Log_Error, "Main") << "Failed when registering arguments.";
 	}
 	else if (!ArgParser::Instance().Process(argc, argv))
 	{
-		cout << "Failed when parsing arguments." << endl;
+		LOGGROUP(Log_Error, "Main") << "Failed when processing arguments.";
+	}
+	else if (!ADLManager::Init())
+	{
+		LOGGROUP(Log_Error, "Main") << "Failed when initializing ADLManager.";
 	}
 	else
 	{
+		LOGGROUP(Log_Error, "Main") << "Main initializating successful.";
 		output();
+		
+		// Terminate ADL
+		ADLManager::Terminate();
 	}
-
-	// Terminate ADL
-	ADLManager::Terminate();
 
 	return 0;
 }
 
 void GlakkeClock::output()
 {
+	// Output debug
 	if (ArgParser::Instance().Exist(kke::ArgDebug))
+	{
 		ADLManager::SetOutputErrors(true);
+		Logger::SetLogLevel(Log_Debug);
+	}
+	else
+	{
+		ADLManager::SetOutputErrors(false);
+		Logger::SetLogLevel(Log_Message);
+	}
+	
+	if (ArgParser::Instance().Exist(kke::ArgColor))
+		Logger::SetColorOutput(true);
+	else
+		Logger::SetColorOutput(false);
+	
 	kke::DeviceVector devices;
 	Device::CreateDevices(devices);
 	
@@ -88,7 +105,7 @@ void GlakkeClock::output()
 			{
 				if (exists)
 				{
-					cout << "Multiple devices with same UDID! (This is odd.)" << endl;
+					LOGGROUP(Log_Error, "Main") << "Multiple devices with same UDID! (This is odd.)";
 					startDevice = 0; 
 					endDevice = 0;
 					break;
@@ -103,7 +120,7 @@ void GlakkeClock::output()
 			
 		if (!exists)
 		{
-			cout << "UDID doesn't exist." << endl;
+			LOGGROUP(Log_Error, "Main") << "UDID doesn't exist.";
 			startDevice = 0;
 			endDevice = 0;
 		}
@@ -113,7 +130,7 @@ void GlakkeClock::output()
 		uint specIndex = ArgParser::Instance().GetInt(kke::ArgCdeviceIndex);
 		if (specIndex >= devices.size())
 		{
-			cout << "Index out of range. Valid: " << '0' << '-' << (devices.size() - 1) << endl;
+			LOGGROUP(Log_Error, "Main") << "Index out of range. Valid: " << '0' << '-' << (devices.size() - 1);
 			startDevice = 0;
 			endDevice = 0;
 		}
@@ -131,7 +148,7 @@ void GlakkeClock::output()
 			{	// Use find, since AMD somehow felt like adding a space at the end of the name.
 				if (exists)
 				{
-					cout << "Multiple devices with same name, use UDID." << endl;
+					LOGGROUP(Log_Error, "Main") << "Multiple devices with same name, use UDID.";
 					startDevice = 0; 
 					endDevice = 0;
 					break;
@@ -146,7 +163,7 @@ void GlakkeClock::output()
 			
 		if (!exists)
 		{
-			cout << "Name doesn't exist." << endl;
+			LOGGROUP(Log_Error, "Main") << "Name doesn't exist.";
 			startDevice = 0;
 			endDevice = 0;
 		}
@@ -336,7 +353,8 @@ void GlakkeClock::output()
 		{
 			if (startDevice != endDevice - 1)
 			{
-				cout << "You should probably not set clocks/fan on ALL devices, see -h, --help." << endl;
+				LOGGROUP(Log_Error, "Main") << "You should probably not set clocks/fan on ALL devices, see -h, --help.";
+				LOGGROUP(Log_Error, "Main") << "TODO: Be able to bypass this?";
 				continue;
 			}
 			
@@ -349,25 +367,27 @@ void GlakkeClock::output()
 				{
 					if (tmpGpu != 0 && (tmpGpu < device.PollODParams().Data.sEngineClock.iMin || tmpGpu > device.PollODParams().Data.sEngineClock.iMax))
 					{
-						cout << "GPU speed not within range." << endl;
+						LOGGROUP(Log_Error, "Main") << "GPU speed not within range.";
 						tmpGpu = 0;
 					}
 					
 					if (tmpMem != 0 &&(tmpMem < device.PollODParams().Data.sMemoryClock.iMin || tmpMem > device.PollODParams().Data.sMemoryClock.iMax))
 					{
-						cout << "Memory speed not within range." << endl;
+						LOGGROUP(Log_Error, "Main") << "Memory speed not within range.";
 						tmpMem = 0;
 					}
 					
 					if (tmpVddc != 0 && (tmpVddc < device.PollODParams().Data.sVddc.iMin || tmpVddc > device.PollODParams().Data.sVddc.iMax))
 					{
-						cout << "VDDC not within range." << endl;
+						LOGGROUP(Log_Error, "Main") << "VDDC not within range.";
 						tmpVddc = 0;
 					}
 					
 					if (tmpGpu != 0 || tmpMem != 0 || tmpVddc != 0)
 						if (!device.ODSetAllLevels(tmpGpu, tmpMem, tmpVddc))
-							cout << "Error when setting clocks/vddc." << endl;
+						{
+							LOGGROUP(Log_Error, "Main") << "Error when setting clocks/vddc.";
+						}
 				}
 
 				if (ArgParser::Instance().Exist(kke::ArgOSclocksReset)  || ArgParser::Instance().Exist(kke::ArgOSallReset))
@@ -375,7 +395,9 @@ void GlakkeClock::output()
 					if (device.PollPerfLvls(true).Valid)
 					{
 						if (!device.ODSetLevels(device.PollPerfLvls(true).Data))
-							cout << "Error when setting performance levels." << endl;
+						{
+							LOGGROUP(Log_Error, "Main") << "Error when setting performance levels.";
+						}
 					}
 				}
 			}
@@ -389,21 +411,29 @@ void GlakkeClock::output()
 				if (ArgParser::Instance().GetString(kke::ArgOCfanType, "Percent") == "Percent")
 				{
 					if (ArgParser::Instance().GetInt(kke::ArgOSfan) < device.PollFanInfo().Data.iMinPercent || ArgParser::Instance().GetInt(kke::ArgOSfan) > device.PollFanInfo().Data.iMaxPercent)
-						cout << "Fan value is incorrect. Valid are (PERCENT): " << device.PollFanInfo().Data.iMinPercent << "-" << device.PollFanInfo().Data.iMaxPercent << endl;
+					{
+						LOGGROUP(Log_Error, "Main") << "Fan value is incorrect. Valid are (PERCENT): " << device.PollFanInfo().Data.iMinPercent << "-" << device.PollFanInfo().Data.iMaxPercent;
+					}
 					else
 					{
 						if (!device.ODSetFan(ArgParser::Instance().GetInt(kke::ArgOSfan), ADL_DL_FANCTRL_SPEED_TYPE_PERCENT))
-							cout << "Setting fan speed failed (PERCENT)." << endl;
+						{
+							LOGGROUP(Log_Error, "Main") << "Setting fan speed failed (PERCENT)." << endl;
+						}
 					}
 				}
 				else // RPM
 				{
 					if (ArgParser::Instance().GetInt(kke::ArgOSfan) < device.PollFanInfo().Data.iMinRPM || ArgParser::Instance().GetInt(kke::ArgOSfan) > device.PollFanInfo().Data.iMaxRPM)
-						cout << "Fan value is invalid. Valid are (RPM): " << device.PollFanInfo().Data.iMinRPM << "-" << device.PollFanInfo().Data.iMaxRPM << endl;
+					{
+						LOGGROUP(Log_Error, "Main") << "Fan value is invalid. Valid are (RPM): " << device.PollFanInfo().Data.iMinRPM << "-" << device.PollFanInfo().Data.iMaxRPM;
+					}
 					else
 					{
 						if (!device.ODSetFan(ArgParser::Instance().GetInt(kke::ArgOSfan), ADL_DL_FANCTRL_SPEED_TYPE_RPM))
-							cout << "Setting fan speed failed (RPM)." << endl;
+						{
+							LOGGROUP(Log_Error, "Main") << "Setting fan speed failed (RPM).";
+						}
 					}
 				}
 			}
@@ -413,7 +443,9 @@ void GlakkeClock::output()
 		{
 			// Set default fan
 			if (!device.ODSetFanDefault())
-				cout << "Error when setting default fan speed." << endl;
+			{
+				LOGGROUP(Log_Error, "Main") << "Error when setting default fan speed." << endl;
+			}
 		}
 		
 		// Display
@@ -440,6 +472,7 @@ void GlakkeClock::output()
 	
 	if (ArgParser::Instance().Exist(kke::ArgHelp))
 	{
+		// TODO: Add synopsis/examples
 		const int col1 = 1, col2 = 7, col3 = 25;
 		
 // 		alignArg("- SYNOPSIS", "", "", col1, col2, col3);
@@ -512,6 +545,7 @@ bool GlakkeClock::registerArgs()
 	good = good && ArgParser::Instance().Register (kke::ArgHelp, kke::ArgumentExist, "help", "h", "Help dialog.");
 	good = good && ArgParser::Instance().Register (kke::ArgVersion, kke::ArgumentExist, "version", "v", "Version.");
 	good = good && ArgParser::Instance().Register (kke::ArgDebug, kke::ArgumentExist, "debug", "d", "Output debug messages.");
+	good = good && ArgParser::Instance().Register (kke::ArgColor, kke::ArgumentExist, "color", "c", "Output colored messages.");
 
 	// Device options
 	good = good && ArgParser::Instance().Register (kke::ArgCdeviceName, kke::ArgumentString, "device-name", "Cdn", "Choose device by name. (Not for Crossfire)");
@@ -590,4 +624,3 @@ void GlakkeClock::alignArg (const string &first, const string &second, const str
 	
 	cout << third << endl;
 }
-

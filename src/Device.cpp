@@ -20,6 +20,7 @@
 
 #include "Device.hpp"
 #include "kkeADL.hpp"
+#include "Debug/Logger.hpp"
 
 #include <iostream>
 #include <string.h>
@@ -117,6 +118,7 @@ void Adapter::ResetPolled()
 // Static
 void Device::CreateDevices(DeviceVector &devices)
 {	
+	LOGGROUP(Log_Debug, "Device") << "Generating device(s)..";
 	int numAdapters = 0;
 	ADLManager::ADL_Adapter_NumberOfAdapters_Get(&numAdapters);
 	AdapterInfo globalAdapters[numAdapters];
@@ -139,6 +141,9 @@ void Device::CreateDevices(DeviceVector &devices)
 		devices.push_back(device);
 	}
 	
+	LOGGROUP(Log_Debug, "Device") << "..successfully created " << devices.size() << " device(s), with " << numAdapters << " adapter(s).";
+	LOGGROUP(Log_Debug, "Device") << "Bubble sorting device(s)..";
+	
 	// Sort devices by UDID
 	// Bubble sort
 	bool bubbleChange = false;
@@ -158,6 +163,8 @@ void Device::CreateDevices(DeviceVector &devices)
 			}
 		}
 	} while (bubbleChange);
+	
+	LOGGROUP(Log_Debug, "Device") << "..done sorting.";
 }
 
 Device::Device(const string &udid, const string &name):
@@ -398,6 +405,7 @@ DisplayVector& Device::GetDisplays()
 
 void Device::DetectAdapters()
 {
+	LOGGROUP(Log_Debug, "Device") << "Detecting adapters for specific device..";
 	int numAdapters = 0;
 	ADLManager::ADL_Adapter_NumberOfAdapters_Get(&numAdapters);
 	AdapterInfo globalAdapters[numAdapters];
@@ -421,6 +429,8 @@ void Device::DetectAdapters()
 			// Belongs to this device
 			adapters.push_back(Adapter(this, globalAdapters[i]));
 		}
+		
+	LOGGROUP(Log_Debug, "Device") << "..done, found " << numAdapters << " adapters.";
 }
 
 void Device::DetectDisplays()
@@ -447,6 +457,7 @@ void Device::DetectDisplays()
 
 void Device::ResetPolled()
 {
+	LOGGROUP(Log_Debug, "Device") << "Reseting all polled values.";
 	// Set all values to invalid, force refresh
 	bios.Valid = false;
 	access.Valid = false;

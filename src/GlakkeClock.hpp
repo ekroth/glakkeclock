@@ -35,6 +35,7 @@ namespace kke
 		ArgHelp,
 		ArgVersion,
 		ArgDebug,
+		ArgColor,
 		
 		ArgCdeviceName,
 		ArgCdeviceUdid,

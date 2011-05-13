@@ -51,6 +51,8 @@ FIND_PACKAGE(ADL REQUIRED)
 ADD_EXECUTABLE(
 ${KKE_BIN}
 
+src/Debug/Logger.cpp
+
 src/IO/ArgParser.cpp
 src/IO/Argument.cpp
 

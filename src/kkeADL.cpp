@@ -19,6 +19,7 @@
 */
 
 #include "kkeADL.hpp"
+#include "Debug/Logger.hpp"
 
 #include <stdlib.h>
 #include <dlfcn.h>
@@ -27,7 +28,7 @@
 #include <iostream>
 #include <string>
 
-using kke::ADLManager;
+using namespace kke;
 
 using std::cout;
 //using std::cerr;
@@ -84,6 +85,7 @@ void __stdcall ADL_Main_Memory_Free(void **lpBuffer)
 
 bool ADLManager::Init()
 {
+	LOGGROUP(Log_Debug, "ADLManager") << "Initializing ADL..";
 	// Load the library.
 
 #if defined (LINUX)
@@ -138,7 +140,7 @@ bool ADLManager::Init()
 	
 	if(!GetAdlErr(_ADL_Main_Control_Create(ADL_Main_Memory_Alloc, 1)))
 	{
-		cout << "ADL_Main_Control_Create was not successful." << endl;
+		LOGGROUP(Log_Error, "ADLManager") << "ADL_Main_Control_Create was not successful.";
 		return false;
 	}
 
@@ -148,6 +150,8 @@ bool ADLManager::Init()
 	FreeLibrary(adlLib);
 #endif
 	adlLib = NULL;
+	
+	LOGGROUP(Log_Debug, "ADLManager") << "..successfully initialized ADL!";
 
 	return true;
 }
@@ -258,7 +262,9 @@ bool ADLManager::GetAdlErr(int error)
 void ADLManager::LogError(const string &msg)
 {
 	if(outputErrors)
-		cout << "Error: " << msg << endl;
+	{
+		LOGGROUP(Log_Error, "ADLManager") << msg;
+	}
 }
 
 // Wrapper functions
