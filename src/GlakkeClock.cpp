@@ -177,6 +177,10 @@ void GlakkeClock::output()
 		// --- Big info
 		if (ArgParser::Instance().Exist(kke::ArgHGinfo) || ArgParser::Instance().Exist(kke::ArgHGinfoLevels))
 		{
+			// Little fix to add line between multiple cards
+			if (i != startDevice)
+				cout << endl << endl;
+			
 			cout << "Name: " << device.GetName() << endl;
 			cout << "UDID: " << device.GetUDID() << endl;
 			cout << "Index: " << i << endl;
