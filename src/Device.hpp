@@ -151,8 +151,8 @@ namespace kke
 		bool ODSetAllLevels(int engine, int memory, int vddc);
 		bool ODResetAllLevels();
 		
-		const std::string& GetUDID() const;
-		const std::string& GetName() const;
+		const std::string GetUDID();
+		const std::string GetName();
 		AdapterVector& GetAdapters();
 		DisplayVector& GetDisplays();
 		

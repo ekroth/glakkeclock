@@ -384,14 +384,14 @@ bool Device::ODResetAllLevels()
 	return result;
 }
 
-const std::string& Device::GetUDID() const
+const std::string Device::GetUDID()
 {
-	return udid;
+	return adapters[adapterIndexDefault].GetInfo().strUDID;
 }
 
-const std::string& Device::GetName() const
+const std::string Device::GetName()
 {
-	return name;
+	return adapters[adapterIndexDefault].GetInfo().strAdapterName;
 }
 
 kke::AdapterVector& Device::GetAdapters()
