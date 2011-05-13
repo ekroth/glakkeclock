@@ -42,6 +42,7 @@ namespace kke
 		ArgCdeviceIndex,
 // 		ArgCadapter,
 		ArgCperfLevel,
+		ArgCpollAdaptIndex,
 		
 		ArgHGinfo,
 		ArgHGinfoLevels,

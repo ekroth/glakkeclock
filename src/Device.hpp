@@ -156,6 +156,8 @@ namespace kke
 		AdapterVector& GetAdapters();
 		DisplayVector& GetDisplays();
 		
+		void SetPollAdapter(int index);
+		
 		// Detect/Refresh Adapters.
 		void DetectAdapters();
 		void DetectDisplays();

@@ -174,6 +174,9 @@ void GlakkeClock::output()
 	{
 		Device &device = *devices[i];
 		
+		if (ArgParser::Instance().Exist(kke::ArgCpollAdaptIndex))
+			device.SetPollAdapter(ArgParser::Instance().GetInt(ArgCpollAdaptIndex));
+		
 		// --- Big info
 		if (ArgParser::Instance().Exist(kke::ArgHGinfo) || ArgParser::Instance().Exist(kke::ArgHGinfoLevels))
 		{
@@ -556,6 +559,7 @@ bool GlakkeClock::registerArgs()
 	good = good && ArgParser::Instance().Register (kke::ArgCdeviceUdid, kke::ArgumentString, "device-udid", "Cdu", "Choose device by UDID.");
 	good = good && ArgParser::Instance().Register (kke::ArgCdeviceIndex, kke::ArgumentInt, "device-index", "Cdi", "Choose device by index.");
 	good = good && ArgParser::Instance().Register (kke::ArgCperfLevel, kke::ArgumentInt, "perf-level", "Cpl", "Choose performance level. (WIP, for poll Hz.)");
+	good = good && ArgParser::Instance().Register (kke::ArgCpollAdaptIndex, kke::ArgumentInt, "poll-adapter", "Cai", "Choose polling adapter index.");
 
 	// Hardware info
 	good = good && ArgParser::Instance().Register (kke::ArgHGinfo, kke::ArgumentExist, "get-info", "HGi", "Device information.");

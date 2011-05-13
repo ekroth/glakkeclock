@@ -404,6 +404,11 @@ DisplayVector& Device::GetDisplays()
 	return displays;
 }
 
+void Device::SetPollAdapter(int index)
+{
+	adapterIndexDefault = index;
+}
+
 void Device::DetectAdapters()
 {
 	LOGGROUP(Log_Debug, "Device") << "Detecting adapters for specific device..";
