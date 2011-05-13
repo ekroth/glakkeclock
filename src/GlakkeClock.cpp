@@ -57,7 +57,7 @@ int GlakkeClock::Execute (int argc, char** argv)
 	}
 	else
 	{
-		LOGGROUP(Log_Error, "Main") << "Main initializating successful.";
+		LOGGROUP(Log_Debug, "Main") << "Main initializating successful.";
 		output();
 		
 		// Terminate ADL
