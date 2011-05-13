@@ -149,6 +149,7 @@ void Device::CreateDevices(DeviceVector &devices)
 	bool bubbleChange = false;
 	do
 	{
+		bubbleChange = false;
 		for (uint i = 0; i < devices.size(); i++)
 		{
 			if (i + 1 < devices.size())

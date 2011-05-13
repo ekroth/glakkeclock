@@ -21,9 +21,8 @@
 #include "kkeADL.hpp"
 #include "Debug/Logger.hpp"
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <dlfcn.h>
-#include <string.h>
 #include <fstream>
 #include <iostream>
 #include <string>

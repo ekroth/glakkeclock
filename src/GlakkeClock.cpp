@@ -354,7 +354,7 @@ void GlakkeClock::output()
 			if (startDevice != endDevice - 1)
 			{
 				LOGGROUP(Log_Error, "Main") << "You should probably not set clocks/fan on ALL devices, see -h, --help.";
-				LOGGROUP(Log_Error, "Main") << "TODO: Be able to bypass this?";
+				LOGGROUP(Log_Debug, "Main") << "TODO: Be able to bypass this?";
 				continue;
 			}
 			
