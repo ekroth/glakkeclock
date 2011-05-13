@@ -175,7 +175,16 @@ void GlakkeClock::output()
 		Device &device = *devices[i];
 		
 		if (ArgParser::Instance().Exist(kke::ArgCpollAdaptIndex))
-			device.SetPollAdapter(ArgParser::Instance().GetInt(ArgCpollAdaptIndex));
+		{
+			if (ArgParser::Instance().GetInt(ArgCpollAdaptIndex) < 0 || ArgParser::Instance().GetInt(ArgCpollAdaptIndex) >= (int)device.GetAdapters().size())
+			{
+				LOGGROUP(Log_Error, "Main") << "Polling adapter out of range.";
+			}
+			else
+			{
+				device.SetPollAdapter(ArgParser::Instance().GetInt(ArgCpollAdaptIndex));
+			}
+		}
 		
 		// --- Big info
 		if (ArgParser::Instance().Exist(kke::ArgHGinfo) || ArgParser::Instance().Exist(kke::ArgHGinfoLevels))
