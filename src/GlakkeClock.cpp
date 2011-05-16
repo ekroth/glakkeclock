@@ -184,7 +184,7 @@ void GlakkeClock::output()
 			else
 			{
 				device.SetPollAdapter(ArgParser::Instance().GetInt(ArgCpollAdaptIndex));
-				LOGGROUP(Log_Debug, "Main") << "Adapter index handle: " << device.GetAdapters()[device.GetPollAdapter()].GetInfo().iAdapterIndex;
+				LOGGROUP(Log_Debug, "Main") << "Adapter index handle: " << device.GetAdapters()[device.GetPollAdapter()]->GetInfo().iAdapterIndex;
 			}
 		}
 		

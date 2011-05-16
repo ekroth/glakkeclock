@@ -103,7 +103,7 @@ namespace kke
 	};
 	
 	typedef std::vector<Display> DisplayVector;
-	typedef std::vector<Adapter> AdapterVector;
+	typedef std::vector<Adapter*> AdapterVector;
 	typedef std::vector<Device*> DeviceVector;
 	typedef std::vector<AdapterInfo> GlobalAdaptVec;
 	
