@@ -265,7 +265,7 @@ const kke::DPerfLvls& Device::PollPerfLvls(bool defaultVals, bool refresh)
 {
 	if (!perfLevels.Valid || refresh)
 	{
-		kke::DOdParams &params = PollODParams(true);
+		const kke::DOdParams &params = PollODParams(true);
 		if (!params.Valid)
 		{
 			perfLevels.Valid = false;
