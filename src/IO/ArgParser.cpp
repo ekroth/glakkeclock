@@ -129,8 +129,8 @@ bool ArgParser::Process(int argc, char **argv)
 	// Skip file name (0).
 	for (int i = 1; i < argc; i++)
 	{
-		string current = string(argv[i]);
-		bool validArg(false);
+		string current(argv[i]);
+		bool validArg = false;
 		int argId;
 		
 		// Find argument with same name
@@ -161,44 +161,51 @@ bool ArgParser::Process(int argc, char **argv)
 				break;
 				
 			case kke::ArgumentInt:
-			{
-				bool error = false;
-				
-				if (i == argc - 1)
 				{
-					error = true;
-				}
-				else
-				{
-					istringstream stream(argv[++i]);
-					if (stream.good())
+					bool error = false;
+					
+					if (i == argc - 1)
 					{
-						int val;
-						stream >> val;
-						
-						arg.SetIvalue(val);
-						arg.SetSvalue(argv[i]); // Also set string
+						error = true;
 					}
 					else
-						error = true;
+					{
+						istringstream stream(argv[++i]);
+						if (stream.good())
+						{
+							int val;
+							stream >> val;
+							
+							arg.SetIvalue(val);
+							arg.SetSvalue(argv[i]); // Also set string
+						}
+						else
+							error = true;
+					}
+					
+					if (error)
+					{
+						cout << '-' + arg.GetShortName() + ", --" + arg.GetLongName() + " argument requires integer." << endl;
+						return false;
+					}
 				}
-				
-				if (error)
-					cout << "-" + arg.GetShortName() + ", --" + arg.GetLongName() + " argument requires integer." << endl;
-			}
 				break;
 				
 			case kke::ArgumentString:
-				bool error = false;
-				
-				if (i == argc - 1)
-					error = true;
-				else
-					arg.SetSvalue(argv[++i]);
-				
-				if (error)
-					cout << "-" + arg.GetShortName() + ", --" + arg.GetLongName() + " argument requires string." << endl;
-				
+				{
+					bool error = false;
+					
+					if (i == argc - 1)
+						error = true;
+					else
+						arg.SetSvalue(argv[++i]);
+					
+					if (error)
+					{
+						cout << '-' + arg.GetShortName() + ", --" + arg.GetLongName() + " argument requires string." << endl;
+						return false;
+					}
+				}
 				break;
 		}
 	}

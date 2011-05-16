@@ -27,19 +27,21 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <iomanip>
 
 using namespace kke;
 
 using std::cout;
 using std::endl;
 using std::string;
+using std::setw;
 
 int GlakkeClock::Execute (int argc, char** argv)
 {
-#ifdef DEBUG
-	cout << "GlakkeClock - ATI/AMD GPU Utility. Version: " << VERSION << endl;
-	cout << "By Andrée 'Glaucous' Ekroth, 2011" << endl << endl;
-#endif
+// #ifdef DEBUG
+// 	cout << "GlakkeClock - ATI/AMD GPU Utility. Version: " << VERSION << endl;
+// 	cout << "By Andrée 'Glaucous' Ekroth, 2011" << endl << endl;
+// #endif
 
 	// After setting devices, we will have to clean afterwards.
 	ArgParser::Instance().CaseSense(false); // Ignore capital letters
@@ -298,22 +300,20 @@ void GlakkeClock::output()
 		if (ArgParser::Instance().Exist(kke::ArgHGadapters))
 			cout << device.GetAdapters().size() << endl;
 		
-		if (ArgParser::Instance().Exist(kke::ArgHGbusLanes))
-			if (device.PollActivity().Valid)
-				cout << device.PollActivity().Data.iCurrentBusLanes << endl;
+		if (ArgParser::Instance().Exist(kke::ArgHGbusLanes) && device.PollActivity().Valid)
+			cout << device.PollActivity().Data.iCurrentBusLanes << endl;
 		
-		if (ArgParser::Instance().Exist(kke::ArgHGbusLanesMax))
-			if (device.PollActivity().Valid)
-				cout << device.PollActivity().Data.iMaximumBusLanes << endl;
+		if (ArgParser::Instance().Exist(kke::ArgHGbusLanesMax) && device.PollActivity().Valid)
+			cout << device.PollActivity().Data.iMaximumBusLanes << endl;
 		
-		if (ArgParser::Instance().Exist(kke::ArgHGbusSpeed))
-			if (device.PollActivity().Valid)
-				cout << device.PollActivity().Data.iCurrentBusSpeed << endl;
+		if (ArgParser::Instance().Exist(kke::ArgHGbusSpeed) && device.PollActivity().Valid)
+			cout << device.PollActivity().Data.iCurrentBusSpeed << endl;
+		
 		
 		// Overdrive
-		if (ArgParser::Instance().Exist(kke::ArgOGperfLevel))
-			if (device.PollActivity().Valid)
-				cout << device.PollActivity().Data.iCurrentPerformanceLevel << endl;
+
+		if (ArgParser::Instance().Exist(kke::ArgOGperfLevel) && device.PollActivity().Valid)
+			cout << device.PollActivity().Data.iCurrentPerformanceLevel << endl;
 		
 		if (ArgParser::Instance().Exist(kke::ArgOGtemperature) && device.PollTemperature().Valid)
 			cout << device.PollTemperature().Data / 1000 << endl;
@@ -322,13 +322,34 @@ void GlakkeClock::output()
 			cout << device.PollActivity().Data.iActivityPercent << endl;
 		
 		if (ArgParser::Instance().Exist(kke::ArgOGclocksGpu) && device.PollActivity().Valid)
-			cout << device.PollActivity().Data.iEngineClock / 100 << endl;
+		{
+			if (ArgParser::Instance().Exist(kke::ArgCperfValue))
+				cout << device.PollPerfLvls(false).Data->aLevels[perfLevel].iEngineClock / 100 << endl;
+			else if (ArgParser::Instance().Exist(kke::ArgCperfDefValue))
+				cout << device.PollPerfLvls(true).Data->aLevels[perfLevel].iEngineClock / 100 << endl;
+			else
+				cout << device.PollActivity().Data.iEngineClock / 100 << endl;
+		}
 		
 		if (ArgParser::Instance().Exist(kke::ArgOGclocksMem) && device.PollActivity().Valid)
-			cout << device.PollActivity().Data.iMemoryClock / 100 << endl;
+		{
+			if (ArgParser::Instance().Exist(kke::ArgCperfValue))
+				cout << device.PollPerfLvls(false).Data->aLevels[perfLevel].iMemoryClock / 100 << endl;
+			else if (ArgParser::Instance().Exist(kke::ArgCperfDefValue))
+				cout << device.PollPerfLvls(true).Data->aLevels[perfLevel].iMemoryClock / 100 << endl;
+			else
+				cout << device.PollActivity().Data.iMemoryClock / 100 << endl;
+		}
 		
 		if (ArgParser::Instance().Exist(kke::ArgOGclocksVddc) && device.PollActivity().Valid)
-			cout << device.PollActivity().Data.iVddc << endl;
+		{
+			if (ArgParser::Instance().Exist(kke::ArgCperfValue))
+				cout << device.PollPerfLvls(false).Data->aLevels[perfLevel].iVddc << endl;
+			else if (ArgParser::Instance().Exist(kke::ArgCperfDefValue))
+				cout << device.PollPerfLvls(true).Data->aLevels[perfLevel].iVddc << endl;
+			else
+				cout << device.PollActivity().Data.iVddc << endl;
+		}
 		
 		// Fan
 		if (ArgParser::Instance().Exist(kke::ArgOGfanType))
@@ -395,22 +416,25 @@ void GlakkeClock::output()
 				
 			if (device.PollODParams().Valid)
 			{
-				if (tmpGpu != 0 && (tmpGpu < device.PollODParams().Data.sEngineClock.iMin || tmpGpu > device.PollODParams().Data.sEngineClock.iMax))
+				if (!ArgParser::Instance().Exist(kke::ArgBypass) &&
+					(tmpGpu != 0 && (tmpGpu < device.PollODParams().Data.sEngineClock.iMin || tmpGpu > device.PollODParams().Data.sEngineClock.iMax)))
 				{
-					LOGGROUP(Log_Error, "Main") << "GPU speed not within range. (Ignore!)";
-// 					tmpGpu = 0;
+					LOGGROUP(Log_Error, "Main") << "GPU speed not within range.";
+					tmpGpu = 0;
 				}
 				
-				if (tmpMem != 0 &&(tmpMem < device.PollODParams().Data.sMemoryClock.iMin || tmpMem > device.PollODParams().Data.sMemoryClock.iMax))
+				if (!ArgParser::Instance().Exist(kke::ArgBypass) &&
+					(tmpMem != 0 && (tmpMem < device.PollODParams().Data.sMemoryClock.iMin || tmpMem > device.PollODParams().Data.sMemoryClock.iMax)))
 				{
-					LOGGROUP(Log_Error, "Main") << "Memory speed not within range. (Ignore!)";
-// 					tmpMem = 0;
+					LOGGROUP(Log_Error, "Main") << "Memory speed not within range.";
+					tmpMem = 0;
 				}
 				
-				if (tmpVddc != 0 && (tmpVddc < device.PollODParams().Data.sVddc.iMin || tmpVddc > device.PollODParams().Data.sVddc.iMax))
+				if (!ArgParser::Instance().Exist(kke::ArgBypass) &&
+					(tmpVddc != 0 && (tmpVddc < device.PollODParams().Data.sVddc.iMin || tmpVddc > device.PollODParams().Data.sVddc.iMax)))
 				{
-					LOGGROUP(Log_Error, "Main") << "VDDC not within range. (Ignore!)";
-// 					tmpVddc = 0;
+					LOGGROUP(Log_Error, "Main") << "VDDC not within range.";
+					tmpVddc = 0;
 				}
 				
 				if (tmpGpu != 0 || tmpMem != 0 || tmpVddc != 0)
@@ -444,7 +468,8 @@ void GlakkeClock::output()
 				{
 					if (ArgParser::Instance().GetString(kke::ArgOCfanType, "Percent") == "Percent")
 					{
-						if (ArgParser::Instance().GetInt(kke::ArgOSfan) < device.PollFanInfo().Data.iMinPercent || ArgParser::Instance().GetInt(kke::ArgOSfan) > device.PollFanInfo().Data.iMaxPercent)
+						if (!ArgParser::Instance().Exist(kke::ArgBypass) &&
+							(ArgParser::Instance().GetInt(kke::ArgOSfan) < device.PollFanInfo().Data.iMinPercent || ArgParser::Instance().GetInt(kke::ArgOSfan) > device.PollFanInfo().Data.iMaxPercent))
 						{
 							LOGGROUP(Log_Error, "Main") << "Fan value is incorrect. Valid are (PERCENT): " << device.PollFanInfo().Data.iMinPercent << "-" << device.PollFanInfo().Data.iMaxPercent;
 						}
@@ -458,7 +483,8 @@ void GlakkeClock::output()
 					}
 					else // RPM
 					{
-						if (ArgParser::Instance().GetInt(kke::ArgOSfan) < device.PollFanInfo().Data.iMinRPM || ArgParser::Instance().GetInt(kke::ArgOSfan) > device.PollFanInfo().Data.iMaxRPM)
+						if (!ArgParser::Instance().Exist(kke::ArgBypass) &&
+							(ArgParser::Instance().GetInt(kke::ArgOSfan) < device.PollFanInfo().Data.iMinRPM || ArgParser::Instance().GetInt(kke::ArgOSfan) > device.PollFanInfo().Data.iMaxRPM))
 						{
 							LOGGROUP(Log_Error, "Main") << "Fan value is invalid. Valid are (RPM): " << device.PollFanInfo().Data.iMinRPM << "-" << device.PollFanInfo().Data.iMaxRPM;
 						}
@@ -507,7 +533,7 @@ void GlakkeClock::output()
 		{
 
 			alignArg("-" + ArgParser::Instance().GetsName(i), "--" + ArgParser::Instance().GetlName(i), ArgParser::Instance().GetInfo(i), col1, col2, col3);
-			
+// 			cout  << setw(col1) << "-" << ArgParser::Instance().GetsName(i) << setw(col2) << "--" << ArgParser::Instance().GetlName(i) << setw(col3) << ArgParser::Instance().GetInfo(i) << endl;
 			switch (i + 1)
 			{
 				case kke::ArgCdeviceName:
@@ -571,14 +597,17 @@ bool GlakkeClock::registerArgs()
 	good = good && ArgParser::Instance().Register (kke::ArgVersion, kke::ArgumentExist, "version", "v", "Version.");
 	good = good && ArgParser::Instance().Register (kke::ArgDebug, kke::ArgumentExist, "debug", "d", "Output debug messages.");
 	good = good && ArgParser::Instance().Register (kke::ArgColor, kke::ArgumentExist, "color", "c", "Output colored messages.");
+	good = good && ArgParser::Instance().Register (kke::ArgBypass, kke::ArgumentExist, "ignore-limits", "il", "Ignore limits, use with caution!");
 
 	// Device options
-	good = good && ArgParser::Instance().Register (kke::ArgCdeviceName, kke::ArgumentString, "device-name", "Cdn", "Choose device by name. (Not for Crossfire)");
+	good = good && ArgParser::Instance().Register (kke::ArgCdeviceName, kke::ArgumentString, "device-name", "Cdn", "Choose device by name.");
 	good = good && ArgParser::Instance().Register (kke::ArgCdeviceUdid, kke::ArgumentString, "device-udid", "Cdu", "Choose device by UDID.");
 	good = good && ArgParser::Instance().Register (kke::ArgCdeviceIndex, kke::ArgumentInt, "device-index", "Cdi", "Choose device by index.");
-	good = good && ArgParser::Instance().Register (kke::ArgCperfLevel, kke::ArgumentInt, "perf-level", "Cpl", "Choose performance level. (WIP, for poll Hz.)");
+	good = good && ArgParser::Instance().Register (kke::ArgCperfLevel, kke::ArgumentInt, "perf-level", "Cpl", "Choose performance level. (Get and set)");
 	good = good && ArgParser::Instance().Register (kke::ArgCpollAdaptIndex, kke::ArgumentInt, "poll-adapter", "Cai", "Choose polling adapter index.");
-
+	good = good && ArgParser::Instance().Register (kke::ArgCperfValue, kke::ArgumentExist, "toggle-perf", "Tp", "Read values of performance levels.");
+	good = good && ArgParser::Instance().Register (kke::ArgCperfDefValue, kke::ArgumentExist, "toggle-def-perf", "Tdp", "Read values of default performance levels.");
+	
 	// Hardware info
 	good = good && ArgParser::Instance().Register (kke::ArgHGinfo, kke::ArgumentExist, "get-info", "HGi", "Device information.");
 	good = good && ArgParser::Instance().Register (kke::ArgHGinfoLevels, kke::ArgumentExist, "get-info-levels", "HGil", "Extended device information.");

@@ -144,7 +144,6 @@ namespace kke
 		bool ODSetFan(int value, int type = ADL_DL_FANCTRL_SPEED_TYPE_PERCENT);
 		bool ODSetFanDefault();
 		
-		bool ODSetLevels(const std::vector<ADLODPerformanceLevel> &levels);
 		// Params set to 0 (except index) will be ignored.
 		bool ODSetOneLevel(int index, int engine, int memory, int vddc);
 		// Params set to 0 will be ignored.

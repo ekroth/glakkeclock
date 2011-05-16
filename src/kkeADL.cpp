@@ -251,7 +251,7 @@ bool ADLManager::GetAdlErr(int error)
 
 void ADLManager::LogError(const string &msg)
 {
-	if(outputErrors)
+	if (outputErrors)
 	{
 		LOGGROUP(Log_Error, "ADLManager") << msg;
 	}
@@ -457,20 +457,14 @@ bool ADLManager::ADL_Overdrive5_FanSpeed_Get(int p1, int p2, ADLFanSpeedValue *p
 		return false;
 	}
 	
-	int speed = p3->iSpeedType;
 	if(!GetAdlErr(_ADL_Overdrive5_FanSpeed_Get(p1, p2, p3)))
 	{
 		LogError("ADL_Overdrive5_FanSpeed_Get");
 
-		if (speed == ADL_DL_FANCTRL_SPEED_TYPE_PERCENT)
-			LogError("iSpeedType Input: ADL_DL_FANCTRL_SPEED_TYPE_PERCENT");
-		else
-			LogError("iSpeedType Input: ADL_DL_FANCTRL_SPEED_TYPE_RPM");
-
 		if (p3->iSpeedType == ADL_DL_FANCTRL_SPEED_TYPE_PERCENT)
-			LogError("iSpeedType Output: ADL_DL_FANCTRL_SPEED_TYPE_PERCENT");
+			LogError("iSpeedType: ADL_DL_FANCTRL_SPEED_TYPE_PERCENT");
 		else
-			LogError("iSpeedType Output: ADL_DL_FANCTRL_SPEED_TYPE_RPM");
+			LogError("iSpeedType: ADL_DL_FANCTRL_SPEED_TYPE_RPM");
 
 		return false;
 	}
@@ -485,15 +479,14 @@ bool ADLManager::ADL_Overdrive5_FanSpeed_Set(int p1, int p2, ADLFanSpeedValue *p
 		return false;
 	}
 	
-	int speed = p3->iSpeedType;
 	if(!GetAdlErr(_ADL_Overdrive5_FanSpeed_Set(p1, p2, p3)))
 	{
 		LogError("ADL_Overdrive5_FanSpeed_Set");
 
-		if(speed == ADL_DL_FANCTRL_SPEED_TYPE_PERCENT)
-			LogError("iSpeedType Input: ADL_DL_FANCTRL_SPEED_TYPE_PERCENT");
+		if (p3->iSpeedType == ADL_DL_FANCTRL_SPEED_TYPE_PERCENT)
+			LogError("iSpeedType: ADL_DL_FANCTRL_SPEED_TYPE_PERCENT");
 		else
-			LogError("iSpeedType Input: ADL_DL_FANCTRL_SPEED_TYPE_RPM");
+			LogError("iSpeedType: ADL_DL_FANCTRL_SPEED_TYPE_RPM");
 
 		return false;
 	}

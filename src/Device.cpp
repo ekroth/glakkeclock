@@ -190,6 +190,7 @@ Device::Device():
 	pollThermal(0)
 {
 	perfLevels.Data = 0;
+	defPerfLevels.Data = 0;
 }
 
 Device::~Device()
@@ -199,6 +200,9 @@ Device::~Device()
 	
 	if (perfLevels.Data != 0)
 		free(perfLevels.Data);
+	
+	if (defPerfLevels.Data != 0)
+		free(defPerfLevels.Data);
 }
 
 const kke::DAccess& Device::PollAccess(bool refresh)
@@ -268,27 +272,33 @@ const kke::DOdParams& Device::PollODParams(bool refresh)
 
 const kke::DPerfLvls& Device::PollPerfLvls(bool defaultVals, bool refresh)
 {
-	if (!perfLevels.Valid || refresh)
+	DPerfLvls *lvls = &perfLevels;
+		
+	if (defaultVals)
+		lvls = &defPerfLevels;
+		
+	if (!lvls->Valid || refresh)
 	{
 		const kke::DOdParams &params = PollODParams(true);
+		
 		if (!params.Valid)
 		{
-			perfLevels.Valid = false;
+			lvls->Valid = false;
 			return perfLevels;
 		}
 		
-		if (perfLevels.Data != 0)
-			free(perfLevels.Data);
+		if (lvls->Data != 0)
+			free(lvls->Data);
 		
 		const size_t size = sizeof(ADLODPerformanceLevels) + sizeof(ADLODPerformanceLevel) * (params.Data.iNumberOfPerformanceLevels - 1);
-		perfLevels.Data = (ADLODPerformanceLevels*)malloc(size);
-		memset(perfLevels.Data,'\0', size);
-		perfLevels.Data->iSize = size;
+		lvls->Data = (ADLODPerformanceLevels*)malloc(size);
+		memset(lvls->Data,'\0', size);
+		lvls->Data->iSize = size;
 		
-		perfLevels.Valid = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Get(adapters[pollAdapter]->GetInfo().iAdapterIndex, defaultVals ? ADL_TRUE : ADL_FALSE, perfLevels.Data);
+		perfLevels.Valid = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Get(adapters[pollAdapter]->GetInfo().iAdapterIndex, defaultVals ? ADL_TRUE : ADL_FALSE, lvls->Data);
 	}
 	
-	return perfLevels;
+	return *lvls;
 }
 
 const kke::DDisplayCount& Device::PollDisplayCount (bool refresh)
@@ -302,13 +312,7 @@ const kke::DDisplayCount& Device::PollDisplayCount (bool refresh)
 }
 
 bool Device::ODSetFan(int value, int type)
-{
-	if (type != ADL_DL_FANCTRL_SPEED_TYPE_PERCENT && type != ADL_DL_FANCTRL_SPEED_TYPE_RPM)
-	{
-		cout << "Invalid Fan Speed Type." << endl;
-		return false;
-	}
-	
+{	
 	ADLFanSpeedValue speedValue;
 	speedValue.iSize = sizeof(ADLFanSpeedValue);
 	speedValue.iFanSpeed = value;
@@ -320,20 +324,6 @@ bool Device::ODSetFan(int value, int type)
 bool Device::ODSetFanDefault()
 {
 	return ADLManager::ADL_Overdrive5_FanSpeedToDefault_Set(adapters[pollAdapter]->GetInfo().iAdapterIndex, pollThermal);
-}
-
-bool Device::ODSetLevels(const std::vector< ADLODPerformanceLevel > &levels)
-{
-	ADLODPerformanceLevels *perfLevelsNew = (ADLODPerformanceLevels*)malloc(sizeof(ADLODPerformanceLevels) + sizeof(ADLODPerformanceLevel) * (levels.size() - 1));
-	perfLevelsNew->iSize = sizeof(ADLODPerformanceLevels) + sizeof(ADLODPerformanceLevel) * (levels.size() - 1);
-	for (uint i = 0; i < levels.size(); i++)
-		perfLevelsNew->aLevels[i] = levels[i];
-	
-	bool result = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Set(adapters[pollAdapter]->GetInfo().iAdapterIndex, perfLevelsNew);
-	
-	free(perfLevelsNew);
-	
-	return result;
 }
 
 bool Device::ODSetOneLevel(int index, int engine, int memory, int vddc)

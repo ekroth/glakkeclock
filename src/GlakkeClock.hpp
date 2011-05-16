@@ -36,6 +36,7 @@ namespace kke
 		ArgVersion,
 		ArgDebug,
 		ArgColor,
+		ArgBypass,
 		
 		ArgCdeviceName,
 		ArgCdeviceUdid,
@@ -43,6 +44,8 @@ namespace kke
 // 		ArgCadapter,
 		ArgCperfLevel,
 		ArgCpollAdaptIndex,
+		ArgCperfValue,
+		ArgCperfDefValue,
 		
 		ArgHGinfo,
 		ArgHGinfoLevels,
