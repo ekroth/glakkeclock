@@ -442,13 +442,30 @@ void GlakkeClock::output()
 					{
 						LOGGROUP(Log_Error, "Main") << "Error when setting clocks/vddc.";
 						
-						for (uint i = device.PollODParams().Data.iNumberOfPerformanceLevels - 1; i > perfLevel; i--)
-							if (device.PollPerfLvls(false).Data->aLevels[i].iEngineClock < tmpGpu ||
-								device.PollPerfLvls(false).Data->aLevels[i].iMemoryClock < tmpMem || 
-								device.PollPerfLvls(false).Data->aLevels[i].iVddc < tmpVddc)
+						for (uint i = 0; i < (uint)device.PollODParams().Data.iNumberOfPerformanceLevels; i++)
+						{
+							if (i == perfLevel)
+								continue;
+							
+							if (i > perfLevel)
 							{
-								LOGGROUP(Log_Warning, "Main") << "Performance level " << i << "'s values are lower then " << perfLevel << "'s specified clocks.";
+								if (device.PollPerfLvls(false).Data->aLevels[i].iEngineClock < tmpGpu ||
+									device.PollPerfLvls(false).Data->aLevels[i].iMemoryClock < tmpMem || 
+									device.PollPerfLvls(false).Data->aLevels[i].iVddc < tmpVddc)
+								{
+									LOGGROUP(Log_Warning, "Main") << "Performance level " << i << "'s values are lower then " << perfLevel << "'s specified clocks.";
+								}
 							}
+							else
+							{
+								if (device.PollPerfLvls(false).Data->aLevels[i].iEngineClock > tmpGpu ||
+								device.PollPerfLvls(false).Data->aLevels[i].iMemoryClock > tmpMem || 
+								device.PollPerfLvls(false).Data->aLevels[i].iVddc > tmpVddc)
+								{
+									LOGGROUP(Log_Warning, "Main") << "Performance level " << i << "'s values are higher then " << perfLevel << "'s specified clocks.";
+								}
+							}
+						}
 							
 					}
 			}
@@ -457,7 +474,7 @@ void GlakkeClock::output()
 			{
 				if (!device.ODResetAllLevels())
 				{
-					LOGGROUP(Log_Error, "Main") << "Error when setting performance levels.";
+					LOGGROUP(Log_Error, "Main") << "Error when reseting performance levels.";
 				}
 			}
 			

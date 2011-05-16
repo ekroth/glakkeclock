@@ -284,7 +284,7 @@ const kke::DPerfLvls& Device::PollPerfLvls(bool defaultVals, bool refresh)
 		if (!params.Valid)
 		{
 			lvls->Valid = false;
-			return perfLevels;
+			return *lvls;
 		}
 		
 		if (lvls->Data != 0)
@@ -295,7 +295,7 @@ const kke::DPerfLvls& Device::PollPerfLvls(bool defaultVals, bool refresh)
 		memset(lvls->Data,'\0', size);
 		lvls->Data->iSize = size;
 		
-		perfLevels.Valid = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Get(adapters[pollAdapter]->GetInfo().iAdapterIndex, defaultVals ? ADL_TRUE : ADL_FALSE, lvls->Data);
+		lvls->Valid = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Get(adapters[pollAdapter]->GetInfo().iAdapterIndex, defaultVals ? ADL_TRUE : ADL_FALSE, lvls->Data);
 	}
 	
 	return *lvls;
@@ -378,7 +378,7 @@ bool Device::ODSetAllLevels(int engine, int memory, int vddc)
 
 bool Device::ODResetAllLevels()
 {
-	const DPerfLvls lvls = PollPerfLvls(true, true);
+	const DPerfLvls &lvls = PollPerfLvls(true, true);
 	if (!lvls.Valid)
 		return false;
 	
