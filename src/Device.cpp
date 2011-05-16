@@ -131,7 +131,8 @@ void Device::CreateDevices(DeviceVector &devices)
 		LOGGROUP(Log_Debug, "Device") << "iAdapterIndex: " << globalAdapters[i].iAdapterIndex;
 		LOGGROUP(Log_Debug, "Device") << "iDeviceNumber: " << globalAdapters[i].iDeviceNumber;
 		LOGGROUP(Log_Debug, "Device") << "strUDID: " << globalAdapters[i].strUDID;
-		LOGGROUP(Log_Debug, "Device") << "iDrvIndex: " << globalAdapters[i].iDrvIndex;
+		LOGGROUP(Log_Debug, "Device") << "iDriverIndex: " << globalAdapters[i].iDrvIndex;
+		LOGGROUP(Log_Debug, "Device") << "iBusNumber: " << globalAdapters[i].iBusNumber;
 		
 		bool alreadyExists = false;
 		for (DeviceVector::iterator dev = devices.begin(); dev != devices.end(); dev++)
@@ -347,10 +348,11 @@ bool Device::ODSetOneLevel(int index, int engine, int memory, int vddc)
 	
 	ADLODPerformanceLevels *perfLevelsNew = (ADLODPerformanceLevels*)malloc(sizeof(ADLODPerformanceLevels) + sizeof(ADLODPerformanceLevel) * (lvls.Data.size() - 1));
 	perfLevelsNew->iSize = sizeof(ADLODPerformanceLevels) + sizeof(ADLODPerformanceLevel) * (lvls.Data.size() - 1);
-	perfLevelsNew->aLevels[0] = perfValue;
 	
 	for (uint i = 1; i < lvls.Data.size(); i++)
 		perfLevelsNew->aLevels[i] = lvls.Data[i];
+	
+	perfLevelsNew->aLevels[index] = perfValue;
 	
 	bool result = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Set(adapters[pollAdapter]->GetInfo().iAdapterIndex, perfLevelsNew);
 	
