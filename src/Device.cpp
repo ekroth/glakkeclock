@@ -165,12 +165,15 @@ void Device::CreateDevices(DeviceVector &devices)
 		}
 	} while (bubbleChange);
 	
+	// Force sort adapters on devices
+	for (uint i = 0; i < devices.size(); i++)
+		devices[i]->sortAdapters();
+	
 	LOGGROUP(Log_Debug, "Device") << "..done sorting.";
 }
 
 Device::Device(const string &udid, const string &name):
 	udid(udid),
-	name(name),
 	adapterIndexDefault(0),
 	thermalControlDefault(0)
 {
@@ -185,7 +188,7 @@ const kke::DAccess& Device::PollAccess(bool refresh)
 	if (!access.Valid || refresh)
 	{
 		int value;
-		access.Valid = ADLManager::ADL_Adapter_Accessibility_Get(adapterIndexDefault, &value);
+		access.Valid = ADLManager::ADL_Adapter_Accessibility_Get(adapters[adapterIndexDefault].GetInfo().iAdapterIndex, &value);
 		access.Data = value == ADL_TRUE ? true : false;
 	}
 	
@@ -195,7 +198,7 @@ const kke::DAccess& Device::PollAccess(bool refresh)
 const kke::DBiosInfo& Device::PollBios(bool refresh)
 {
 	if (!bios.Valid || refresh)
-		bios.Valid = ADLManager::ADL_Adapter_VideoBiosInfo_Get(adapterIndexDefault, &bios.Data);
+		bios.Valid = ADLManager::ADL_Adapter_VideoBiosInfo_Get(adapters[adapterIndexDefault].GetInfo().iAdapterIndex, &bios.Data);
 	
 	return bios;
 }
@@ -203,7 +206,7 @@ const kke::DBiosInfo& Device::PollBios(bool refresh)
 const kke::DActivity& Device::PollActivity(bool refresh)
 {
 	if (!activity.Valid || refresh)
-		activity.Valid = ADLManager::ADL_Overdrive5_CurrentActivity_Get(adapterIndexDefault, &activity.Data);
+		activity.Valid = ADLManager::ADL_Overdrive5_CurrentActivity_Get(adapters[adapterIndexDefault].GetInfo().iAdapterIndex, &activity.Data);
 	
 	return activity;
 }
@@ -214,7 +217,7 @@ const kke::DTemperature& Device::PollTemperature(bool refresh)
 	{
 		ADLTemperature temp;
 		temp.iSize = sizeof(ADLTemperature);
-		temperature.Valid = ADLManager::ADL_Overdrive5_Temperature_Get(adapterIndexDefault, thermalControlDefault, &temp);
+		temperature.Valid = ADLManager::ADL_Overdrive5_Temperature_Get(adapters[adapterIndexDefault].GetInfo().iAdapterIndex, thermalControlDefault, &temp);
 		temperature.Data = temp.iTemperature;
 	}
 	
@@ -224,7 +227,7 @@ const kke::DTemperature& Device::PollTemperature(bool refresh)
 const kke::DFanInfo& Device::PollFanInfo(bool refresh)
 {
 	if (!fanInfo.Valid || refresh)
-		fanInfo.Valid = ADLManager::ADL_Overdrive5_FanSpeedInfo_Get(adapterIndexDefault, thermalControlDefault, &fanInfo.Data);
+		fanInfo.Valid = ADLManager::ADL_Overdrive5_FanSpeedInfo_Get(adapters[adapterIndexDefault].GetInfo().iAdapterIndex, thermalControlDefault, &fanInfo.Data);
 	
 	return fanInfo;
 }
@@ -232,7 +235,7 @@ const kke::DFanInfo& Device::PollFanInfo(bool refresh)
 const kke::DFanSpeed& Device::PollFanSpeed(bool refresh)
 {
 	if (!fanSpeed.Valid || refresh)
-		fanSpeed.Valid = ADLManager::ADL_Overdrive5_FanSpeed_Get(adapterIndexDefault, thermalControlDefault, &fanSpeed.Data);
+		fanSpeed.Valid = ADLManager::ADL_Overdrive5_FanSpeed_Get(adapters[adapterIndexDefault].GetInfo().iAdapterIndex, thermalControlDefault, &fanSpeed.Data);
 	
 	return fanSpeed;
 }
@@ -240,7 +243,7 @@ const kke::DFanSpeed& Device::PollFanSpeed(bool refresh)
 const kke::DOdParams& Device::PollODParams(bool refresh)
 {
 	if (!odParams.Valid || refresh)
-		odParams.Valid = ADLManager::ADL_Overdrive5_ODParameters_Get(adapterIndexDefault, &odParams.Data);
+		odParams.Valid = ADLManager::ADL_Overdrive5_ODParameters_Get(adapters[adapterIndexDefault].GetInfo().iAdapterIndex, &odParams.Data);
 	
 	return odParams;
 }
@@ -260,7 +263,7 @@ const kke::DPerfLvls& Device::PollPerfLvls(bool defaultVals, bool refresh)
 		memset(perfLevelsNew,'\0', sizeof(ADLODPerformanceLevels) + sizeof(ADLODPerformanceLevel) * (params.Data.iNumberOfPerformanceLevels - 1));
 		perfLevelsNew->iSize = sizeof(ADLODPerformanceLevels) + sizeof(ADLODPerformanceLevel) * (params.Data.iNumberOfPerformanceLevels - 1);
 		
-		perfLevels.Valid = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Get(adapterIndexDefault, defaultVals ? ADL_TRUE : ADL_FALSE, perfLevelsNew);
+		perfLevels.Valid = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Get(adapters[adapterIndexDefault].GetInfo().iAdapterIndex, defaultVals ? ADL_TRUE : ADL_FALSE, perfLevelsNew);
 		
 		if (perfLevels.Valid)
 			for (int i = 0; i < params.Data.iNumberOfPerformanceLevels; i++)
@@ -276,7 +279,7 @@ const kke::DDisplayCount& Device::PollDisplayCount (bool refresh)
 {
 	if (!displayCount.Valid || refresh)
 	{
-		displayCount.Valid = ADLManager::ADL_Display_NumberOfDisplays_Get(adapterIndexDefault, &displayCount.Data);
+		displayCount.Valid = ADLManager::ADL_Display_NumberOfDisplays_Get(adapters[adapterIndexDefault].GetInfo().iAdapterIndex, &displayCount.Data);
 	}
 	
 	return displayCount;
@@ -295,12 +298,12 @@ bool Device::ODSetFan(int value, int type)
 	speedValue.iFanSpeed = value;
 	speedValue.iSpeedType = type;
 	speedValue.iFlags = ADL_DL_FANCTRL_FLAG_USER_DEFINED_SPEED;
-	return ADLManager::ADL_Overdrive5_FanSpeed_Set(adapterIndexDefault, thermalControlDefault, &speedValue);
+	return ADLManager::ADL_Overdrive5_FanSpeed_Set(adapters[adapterIndexDefault].GetInfo().iAdapterIndex, thermalControlDefault, &speedValue);
 }
 
 bool Device::ODSetFanDefault()
 {
-	return ADLManager::ADL_Overdrive5_FanSpeedToDefault_Set(adapterIndexDefault, thermalControlDefault);
+	return ADLManager::ADL_Overdrive5_FanSpeedToDefault_Set(adapters[adapterIndexDefault].GetInfo().iAdapterIndex, thermalControlDefault);
 }
 
 bool Device::ODSetLevels(const std::vector< ADLODPerformanceLevel > &levels)
@@ -310,7 +313,7 @@ bool Device::ODSetLevels(const std::vector< ADLODPerformanceLevel > &levels)
 	for (uint i = 0; i < levels.size(); i++)
 		perfLevelsNew->aLevels[i] = levels[i];
 	
-	bool result = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Set(adapterIndexDefault, perfLevelsNew);
+	bool result = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Set(adapters[adapterIndexDefault].GetInfo().iAdapterIndex, perfLevelsNew);
 	
 	free(perfLevelsNew);
 	
@@ -335,7 +338,7 @@ bool Device::ODSetOneLevel(int index, int engine, int memory, int vddc)
 	for (uint i = 1; i < lvls.Data.size(); i++)
 		perfLevelsNew->aLevels[i] = lvls.Data[i];
 	
-	bool result = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Set(adapterIndexDefault, perfLevelsNew);
+	bool result = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Set(adapters[adapterIndexDefault].GetInfo().iAdapterIndex, perfLevelsNew);
 	
 	free(perfLevelsNew);
 	
@@ -358,7 +361,7 @@ bool Device::ODSetAllLevels(int engine, int memory, int vddc)
 		perfLevelsNew->aLevels[i].iVddc = 			vddc != 0 ? vddc : lvls.Data[i].iVddc;
 	}
 	
-	bool result = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Set(adapterIndexDefault, perfLevelsNew);
+	bool result = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Set(adapters[adapterIndexDefault].GetInfo().iAdapterIndex, perfLevelsNew);
 	
 	free(perfLevelsNew);
 	
@@ -377,7 +380,7 @@ bool Device::ODResetAllLevels()
 	for (uint i = 0; i < lvls.Data.size(); i++)
 		perfLevelsNew->aLevels[i] = lvls.Data[i];
 	
-	bool result = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Set(adapterIndexDefault, perfLevelsNew);
+	bool result = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Set(adapters[adapterIndexDefault].GetInfo().iAdapterIndex, perfLevelsNew);
 	
 	free(perfLevelsNew);
 	
@@ -407,6 +410,11 @@ DisplayVector& Device::GetDisplays()
 void Device::SetPollAdapter(int index)
 {
 	adapterIndexDefault = index;
+}
+
+int Device::GetPollAdapter() const
+{
+	return adapterIndexDefault;
 }
 
 void Device::DetectAdapters()
@@ -446,7 +454,7 @@ void Device::DetectDisplays()
 	
 	ADLDisplayInfo *displayInfo = 0;
 	int displayNum = 0;
-	if (ADLManager::ADL_Display_DisplayInfo_Get(adapterIndexDefault, &displayNum, &displayInfo, 0))
+	if (ADLManager::ADL_Display_DisplayInfo_Get(adapters[adapterIndexDefault].GetInfo().iAdapterIndex, &displayNum, &displayInfo, 0))
 	{
 		displayCount.Valid = true;
 		displayCount.Data = displayNum;
@@ -475,4 +483,31 @@ void Device::ResetPolled()
 	perfLevels.Valid = false;
 	defPerfLevels.Valid = false;
 	displayCount.Valid = false;
+}
+
+void Device::sortAdapters()
+{
+	// Bubble sort adapters
+	LOGGROUP(Log_Debug, "Device") << "Begin bubble sorting adapters..";
+	
+	bool bubbleChange = false;
+	do
+	{
+		bubbleChange = false;
+		for (uint i = 0; i < adapters.size(); i++)
+		{
+			if (i + 1 < adapters.size())
+			{
+				if (adapters[i].GetInfo().iAdapterIndex > adapters[i].GetInfo().iAdapterIndex)
+				{
+					bubbleChange = true;
+					Adapter tmp = adapters[i];
+					adapters[i] = adapters[i + 1];
+					adapters[i + 1] = tmp;
+				}
+			}
+		}
+	} while (bubbleChange);
+	
+	LOGGROUP(Log_Debug, "Device") << "..bubblesorting adapters done.";
 }

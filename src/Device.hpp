@@ -157,14 +157,16 @@ namespace kke
 		DisplayVector& GetDisplays();
 		
 		void SetPollAdapter(int index);
+		int GetPollAdapter() const;
 		
 		// Detect/Refresh Adapters.
 		void DetectAdapters();
 		void DetectDisplays();
 		void ResetPolled();
-	private:		
+	private:
+		void sortAdapters();
+		
 		std::string udid;
-		std::string name;
 		
 		DBiosInfo bios;
 		DAccess access;

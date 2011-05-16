@@ -128,9 +128,9 @@ void GlakkeClock::output()
 	else if (ArgParser::Instance().Exist(kke::ArgCdeviceIndex))
 	{
 		uint specIndex = ArgParser::Instance().GetInt(kke::ArgCdeviceIndex);
-		if (specIndex >= devices.size())
+		if (specIndex >= devices.size() || specIndex < 0)
 		{
-			LOGGROUP(Log_Error, "Main") << "Index out of range. Valid: " << '0' << '-' << (devices.size() - 1);
+			LOGGROUP(Log_Error, "Main") << "Device index out of range. Valid: " << '0' << '-' << (devices.size() - 1);
 			startDevice = 0;
 			endDevice = 0;
 		}
@@ -178,11 +178,13 @@ void GlakkeClock::output()
 		{
 			if (ArgParser::Instance().GetInt(ArgCpollAdaptIndex) < 0 || ArgParser::Instance().GetInt(ArgCpollAdaptIndex) >= (int)device.GetAdapters().size())
 			{
-				LOGGROUP(Log_Error, "Main") << "Polling adapter out of range.";
+				LOGGROUP(Log_Error, "Main") << "Polling adapter out of range. Valid: " << 0 << '-' << (device.GetAdapters().size() - 1);
+				break;
 			}
 			else
 			{
 				device.SetPollAdapter(ArgParser::Instance().GetInt(ArgCpollAdaptIndex));
+				LOGGROUP(Log_Debug, "Main") << "Adapter index handle: " << device.GetAdapters()[device.GetPollAdapter()].GetInfo().iAdapterIndex;
 			}
 		}
 		
@@ -196,6 +198,7 @@ void GlakkeClock::output()
 			cout << "Name: " << device.GetName() << endl;
 			cout << "UDID: " << device.GetUDID() << endl;
 			cout << "Index: " << i << endl;
+			cout << "Adapters: " << device.GetAdapters().size() << endl;
 			
 			if (device.PollBios().Valid)
 			{

@@ -27,10 +27,14 @@
 #include <iostream>
 #include <string>
 
+#if defined (LINUX)
+#define GetProc dlsym
+#else
+#define GetProc GetProcAddress
+#endif
+
 using namespace kke;
 
-using std::cout;
-//using std::cerr;
 using std::endl;
 using std::string;
 
@@ -106,15 +110,8 @@ bool ADLManager::Init()
 	if(_ADL_Main_Control_Destroy == 0)
 		return false;
 
-
 	_ADL_Adapter_NumberOfAdapters_Get = (ADL_ADAPTER_NUMBEROFADAPTERS_GET)getProcAddress(adlLib, "ADL_Adapter_NumberOfAdapters_Get");
-	if(_ADL_Adapter_NumberOfAdapters_Get == 0)
-		return false;
-
 	_ADL_Adapter_AdapterInfo_Get = (ADL_ADAPTER_ADAPTERINFO_GET)getProcAddress(adlLib, "ADL_Adapter_AdapterInfo_Get");
-	if(_ADL_Adapter_AdapterInfo_Get == 0)
-		return false;
-
 	_ADL_Adapter_ID_Get = (ADL_ADAPTER_ID_GET)getProcAddress(adlLib, "ADL_Adapter_ID_Get");
 	_ADL_Adapter_Crossfire_Caps = (ADL_ADAPTER_CROSSFIRE_CAPS)getProcAddress(adlLib, "ADL_Adapter_Crossfire_Caps");
 	_ADL_Adapter_Crossfire_Get = (ADL_ADAPTER_CROSSFIRE_GET)getProcAddress(adlLib, "ADL_Adapter_Crossfire_Get");
@@ -163,12 +160,6 @@ void ADLManager::Terminate()
 
 void *ADLManager::getProcAddress(void *lib, const char *name)
 {
-#if defined (LINUX)
-#define GetProc dlsym
-#else
-#define GetProc GetProcAddress
-#endif
-
 	void *address = GetProc(lib, name);
 
 	if(address == 0)
