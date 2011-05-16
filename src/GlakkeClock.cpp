@@ -94,7 +94,7 @@ void GlakkeClock::output()
 		(*it)->DetectDisplays();
 	}
 	
-	uint startDevice = 0, endDevice = devices.size();
+	uint startDevice = 0, endDevice = devices.size(), perfLevel = ArgParser::Instance().GetInt(kke::ArgCperfLevel, 0);
 	
 	// --- Set device
 	if (ArgParser::Instance().Exist(kke::ArgCdeviceUdid))
@@ -174,11 +174,23 @@ void GlakkeClock::output()
 	{
 		Device &device = *devices[i];
 		
+		if (!ArgParser::Instance().Exist(kke::ArgCperfLevel))
+		{
+			// Default use current performance level
+			perfLevel = device.PollActivity().Data.iCurrentPerformanceLevel;
+		}
+		
+		if (perfLevel >= (uint)device.PollODParams().Data.iNumberOfPerformanceLevels || perfLevel < 0)
+		{
+			LOGGROUP(Log_Error, "Main") << "Performance level is out of range. Valid: 0-" << (device.PollODParams().Data.iNumberOfPerformanceLevels - 1);
+			continue;
+		}
+		
 		if (ArgParser::Instance().Exist(kke::ArgCpollAdaptIndex))
 		{
 			if (ArgParser::Instance().GetInt(ArgCpollAdaptIndex) < 0 || ArgParser::Instance().GetInt(ArgCpollAdaptIndex) >= (int)device.GetAdapters().size())
 			{
-				LOGGROUP(Log_Error, "Main") << "Polling adapter out of range. Valid: " << 0 << '-' << (device.GetAdapters().size() - 1);
+				LOGGROUP(Log_Error, "Main") << "Polling adapter out of range. Valid: 0-" << (device.GetAdapters().size() - 1);
 				continue;
 			}
 			else
@@ -253,9 +265,9 @@ void GlakkeClock::output()
 					for (int v = 0; v < device.PollODParams().Data.iNumberOfPerformanceLevels; v++)
 					{
 						cout << "Performance Level: " << v << endl;
-						cout << "GPU (MHz): " << 	device.PollPerfLvls(false).Data[v].iEngineClock / 100 << " [" << device.PollODParams().Data.sEngineClock.iMin / 100 << '-' << device.PollODParams().Data.sEngineClock.iMax / 100 << ']' << endl;
-						cout << "Memory (MHz): " << device.PollPerfLvls(false).Data[v].iMemoryClock / 100 << " [" << device.PollODParams().Data.sMemoryClock.iMin / 100  << '-' << device.PollODParams().Data.sMemoryClock.iMax / 100 << ']' << endl;
-						cout << "Vddc (mV): " << 	device.PollPerfLvls(false).Data[v].iVddc << " [" << device.PollODParams().Data.sVddc.iMin << '-' << device.PollODParams().Data.sVddc.iMax << ']' << endl;
+						cout << "GPU (MHz): " << 	device.PollPerfLvls(false).Data->aLevels[v].iEngineClock / 100 << " [" << device.PollODParams().Data.sEngineClock.iMin / 100 << '-' << device.PollODParams().Data.sEngineClock.iMax / 100 << ']' << endl;
+						cout << "Memory (MHz): " << device.PollPerfLvls(false).Data->aLevels[v].iMemoryClock / 100 << " [" << device.PollODParams().Data.sMemoryClock.iMin / 100  << '-' << device.PollODParams().Data.sMemoryClock.iMax / 100 << ']' << endl;
+						cout << "Vddc (mV): " << 	device.PollPerfLvls(false).Data->aLevels[v].iVddc << " [" << device.PollODParams().Data.sVddc.iMin << '-' << device.PollODParams().Data.sVddc.iMax << ']' << endl;
 
 						if (v != device.PollODParams().Data.iNumberOfPerformanceLevels - 1)
 							cout << endl;
@@ -385,24 +397,24 @@ void GlakkeClock::output()
 			{
 				if (tmpGpu != 0 && (tmpGpu < device.PollODParams().Data.sEngineClock.iMin || tmpGpu > device.PollODParams().Data.sEngineClock.iMax))
 				{
-					LOGGROUP(Log_Error, "Main") << "GPU speed not within range.";
-					tmpGpu = 0;
+					LOGGROUP(Log_Error, "Main") << "GPU speed not within range. (Ignore!)";
+// 					tmpGpu = 0;
 				}
 				
 				if (tmpMem != 0 &&(tmpMem < device.PollODParams().Data.sMemoryClock.iMin || tmpMem > device.PollODParams().Data.sMemoryClock.iMax))
 				{
-					LOGGROUP(Log_Error, "Main") << "Memory speed not within range.";
-					tmpMem = 0;
+					LOGGROUP(Log_Error, "Main") << "Memory speed not within range. (Ignore!)";
+// 					tmpMem = 0;
 				}
 				
 				if (tmpVddc != 0 && (tmpVddc < device.PollODParams().Data.sVddc.iMin || tmpVddc > device.PollODParams().Data.sVddc.iMax))
 				{
-					LOGGROUP(Log_Error, "Main") << "VDDC not within range.";
-					tmpVddc = 0;
+					LOGGROUP(Log_Error, "Main") << "VDDC not within range. (Ignore!)";
+// 					tmpVddc = 0;
 				}
 				
 				if (tmpGpu != 0 || tmpMem != 0 || tmpVddc != 0)
-					if (!device.ODSetAllLevels(tmpGpu, tmpMem, tmpVddc))
+					if (!device.ODSetOneLevel(perfLevel, tmpGpu, tmpMem, tmpVddc))
 					{
 						LOGGROUP(Log_Error, "Main") << "Error when setting clocks/vddc.";
 					}
@@ -410,12 +422,9 @@ void GlakkeClock::output()
 
 			if (ArgParser::Instance().Exist(kke::ArgOSclocksReset)  || ArgParser::Instance().Exist(kke::ArgOSallReset))
 			{
-				if (device.PollPerfLvls(true).Valid)
+				if (!device.ODResetAllLevels())
 				{
-					if (!device.ODSetLevels(device.PollPerfLvls(true).Data))
-					{
-						LOGGROUP(Log_Error, "Main") << "Error when setting performance levels.";
-					}
+					LOGGROUP(Log_Error, "Main") << "Error when setting performance levels.";
 				}
 			}
 			

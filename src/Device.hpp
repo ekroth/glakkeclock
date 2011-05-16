@@ -114,7 +114,7 @@ namespace kke
 	typedef PollData<ADLFanSpeedInfo> DFanInfo;
 	typedef PollData<ADLFanSpeedValue> DFanSpeed;
 	typedef PollData<ADLODParameters> DOdParams;
-	typedef PollData< std::vector<ADLODPerformanceLevel> > DPerfLvls;
+	typedef PollData< ADLODPerformanceLevels* > DPerfLvls;
 	typedef PollData<int> DDisplayCount;
   
 	/**

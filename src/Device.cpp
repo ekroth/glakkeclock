@@ -155,46 +155,50 @@ void Device::CreateDevices(DeviceVector &devices)
 	}
 	
 	LOGGROUP(Log_Debug, "Device") << "..successfully created " << devices.size() << " device(s), with " << numAdapters << " adapter(s).";
-	LOGGROUP(Log_Debug, "Device") << "Bubble sorting device(s)..";
-	
-	// Sort devices by UDID
-	// Bubble sort
-	bool bubbleChange = false;
-	do
-	{
-		bubbleChange = false;
-		for (uint i = 0; i < devices.size(); i++)
-		{
-			if (i + 1 < devices.size())
-			{
-				if (devices[i]->GetUDID() > devices[i + 1]->GetUDID())
-				{
-					bubbleChange = true;
-					Device *tmp = devices[i];
-					devices[i] = devices[i + 1];
-					devices[i + 1] = tmp;
-				}
-			}
-		}
-	} while (bubbleChange);
-	
-	LOGGROUP(Log_Debug, "Device") << "..done sorting.";
-	
+// 	LOGGROUP(Log_Debug, "Device") << "Bubble sorting device(s)..";
+// 	
+// 	// Sort devices by UDID
+// 	// Bubble sort
+// 	bool bubbleChange = false;
+// 	do
+// 	{
+// 		bubbleChange = false;
+// 		for (uint i = 0; i < devices.size(); i++)
+// 		{
+// 			if (i + 1 < devices.size())
+// 			{
+// 				if (devices[i]->GetUDID() > devices[i + 1]->GetUDID())
+// 				{
+// 					bubbleChange = true;
+// 					Device *tmp = devices[i];
+// 					devices[i] = devices[i + 1];
+// 					devices[i + 1] = tmp;
+// 				}
+// 			}
+// 		}
+// 	} while (bubbleChange);
+// 	
+// 	LOGGROUP(Log_Debug, "Device") << "..done sorting.";
+/*	
 	// Force sort adapters on devices
 	for (uint i = 0; i < devices.size(); i++)
-		devices[i]->sortAdapters();
+		devices[i]->sortAdapters();*/
 }
 
 Device::Device():
 	pollAdapter(0),
 	pollThermal(0)
 {
+	perfLevels.Data = 0;
 }
 
 Device::~Device()
 {
 	for (AdapterVector::iterator it = adapters.begin(); it != adapters.end(); it++)
 		delete *it;
+	
+	if (perfLevels.Data != 0)
+		free(perfLevels.Data);
 }
 
 const kke::DAccess& Device::PollAccess(bool refresh)
@@ -273,18 +277,15 @@ const kke::DPerfLvls& Device::PollPerfLvls(bool defaultVals, bool refresh)
 			return perfLevels;
 		}
 		
+		if (perfLevels.Data != 0)
+			free(perfLevels.Data);
+		
 		const size_t size = sizeof(ADLODPerformanceLevels) + sizeof(ADLODPerformanceLevel) * (params.Data.iNumberOfPerformanceLevels - 1);
-		ADLODPerformanceLevels *perfLevelsNew = (ADLODPerformanceLevels*)malloc(size);
-		memset(perfLevelsNew,'\0', size);
-		perfLevelsNew->iSize = size;
+		perfLevels.Data = (ADLODPerformanceLevels*)malloc(size);
+		memset(perfLevels.Data,'\0', size);
+		perfLevels.Data->iSize = size;
 		
-		perfLevels.Valid = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Get(adapters[pollAdapter]->GetInfo().iAdapterIndex, defaultVals ? ADL_TRUE : ADL_FALSE, perfLevelsNew);
-		
-		if (perfLevels.Valid)
-			for (int i = 0; i < params.Data.iNumberOfPerformanceLevels; i++)
-				perfLevels.Data.push_back(perfLevelsNew->aLevels[i]);
-		
-		free(perfLevelsNew);
+		perfLevels.Valid = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Get(adapters[pollAdapter]->GetInfo().iAdapterIndex, defaultVals ? ADL_TRUE : ADL_FALSE, perfLevels.Data);
 	}
 	
 	return perfLevels;
@@ -342,15 +343,14 @@ bool Device::ODSetOneLevel(int index, int engine, int memory, int vddc)
 		return false;
 	
 	ADLODPerformanceLevel perfValue;
-	perfValue.iEngineClock =	engine != 0 ? engine : lvls.Data[index].iEngineClock;
-	perfValue.iMemoryClock = 	memory != 0 ? memory : lvls.Data[index].iMemoryClock;
-	perfValue.iVddc = 			vddc != 0 ? vddc : lvls.Data[index].iVddc;
+	perfValue.iEngineClock =	engine != 0 ? engine : PollActivity().Data.iEngineClock;
+	perfValue.iMemoryClock = 	memory != 0 ? memory : PollActivity().Data.iMemoryClock;
+	perfValue.iVddc = 			vddc != 0 ? vddc : PollActivity().Data.iVddc;
 	
-	ADLODPerformanceLevels *perfLevelsNew = (ADLODPerformanceLevels*)malloc(sizeof(ADLODPerformanceLevels) + sizeof(ADLODPerformanceLevel) * (lvls.Data.size() - 1));
-	perfLevelsNew->iSize = sizeof(ADLODPerformanceLevels) + sizeof(ADLODPerformanceLevel) * (lvls.Data.size() - 1);
+	ADLODPerformanceLevels *perfLevelsNew = (ADLODPerformanceLevels*)malloc(lvls.Data->iSize);
 	
-	for (uint i = 1; i < lvls.Data.size(); i++)
-		perfLevelsNew->aLevels[i] = lvls.Data[i];
+	// Copy curren values
+	memcpy(perfLevelsNew, lvls.Data, lvls.Data->iSize); 
 	
 	perfLevelsNew->aLevels[index] = perfValue;
 	
@@ -363,43 +363,36 @@ bool Device::ODSetOneLevel(int index, int engine, int memory, int vddc)
 
 bool Device::ODSetAllLevels(int engine, int memory, int vddc)
 {
-	const DPerfLvls &lvls = PollPerfLvls(true, true);
-	if (!lvls.Valid)
-		return false;
+// 	const DPerfLvls &lvls = PollPerfLvls(true);
+// 	if (!lvls.Valid)
+// 		return false;
+// 	
+// 	ADLODPerformanceLevels *perfLevelsNew = (ADLODPerformanceLevels*)malloc(sizeof(ADLODPerformanceLevels) + sizeof(ADLODPerformanceLevel) * (lvls.Data.size() - 1));
+// 	perfLevelsNew->iSize = sizeof(ADLODPerformanceLevels) + sizeof(ADLODPerformanceLevel) * (lvls.Data.size() - 1);
+// 	
+// 	for (uint i = 0; i < lvls.Data.size(); i++)
+// 	{
+// 		perfLevelsNew->aLevels[i].iEngineClock = 	engine != 0 ? engine : lvls.Data[i].iEngineClock;
+// 		perfLevelsNew->aLevels[i].iMemoryClock = 	memory != 0 ? memory : lvls.Data[i].iMemoryClock;
+// 		perfLevelsNew->aLevels[i].iVddc = 			vddc != 0 ? vddc : lvls.Data[i].iVddc;
+// 	}
 	
-	ADLODPerformanceLevels *perfLevelsNew = (ADLODPerformanceLevels*)malloc(sizeof(ADLODPerformanceLevels) + sizeof(ADLODPerformanceLevel) * (lvls.Data.size() - 1));
-	perfLevelsNew->iSize = sizeof(ADLODPerformanceLevels) + sizeof(ADLODPerformanceLevel) * (lvls.Data.size() - 1);
+// 	bool result = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Set(adapters[pollAdapter]->GetInfo().iAdapterIndex, perfLevelsNew);
 	
-	for (uint i = 0; i < lvls.Data.size(); i++)
-	{
-		perfLevelsNew->aLevels[i].iEngineClock = 	engine != 0 ? engine : lvls.Data[i].iEngineClock;
-		perfLevelsNew->aLevels[i].iMemoryClock = 	memory != 0 ? memory : lvls.Data[i].iMemoryClock;
-		perfLevelsNew->aLevels[i].iVddc = 			vddc != 0 ? vddc : lvls.Data[i].iVddc;
-	}
+// 	free(perfLevelsNew);
 	
-	bool result = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Set(adapters[pollAdapter]->GetInfo().iAdapterIndex, perfLevelsNew);
-	
-	free(perfLevelsNew);
-	
-	return result;
+// 	return result;
+
+	return false;
 }
 
 bool Device::ODResetAllLevels()
 {
-	const DPerfLvls &lvls = PollPerfLvls(true, true);
+	const DPerfLvls lvls = PollPerfLvls(true, true);
 	if (!lvls.Valid)
 		return false;
 	
-	const size_t size = sizeof(ADLODPerformanceLevels) + sizeof(ADLODPerformanceLevel) * (lvls.Data.size() - 1);
-	ADLODPerformanceLevels *perfLevelsNew = (ADLODPerformanceLevels*)malloc(size);
-	perfLevelsNew->iSize = size;
-	
-	for (uint i = 0; i < lvls.Data.size(); i++)
-		perfLevelsNew->aLevels[i] = lvls.Data[i];
-	
-	bool result = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Set(adapters[pollAdapter]->GetInfo().iAdapterIndex, perfLevelsNew);
-	
-	free(perfLevelsNew);
+	bool result = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Set(adapters[pollAdapter]->GetInfo().iAdapterIndex, lvls.Data);
 	
 	return result;
 }
