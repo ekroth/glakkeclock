@@ -441,6 +441,15 @@ void GlakkeClock::output()
 					if (!device.ODSetOneLevel(perfLevel, tmpGpu, tmpMem, tmpVddc))
 					{
 						LOGGROUP(Log_Error, "Main") << "Error when setting clocks/vddc.";
+						
+						for (uint i = device.PollODParams().Data.iNumberOfPerformanceLevels - 1; i > perfLevel; i--)
+							if (device.PollPerfLvls(false).Data->aLevels[i].iEngineClock < tmpGpu ||
+								device.PollPerfLvls(false).Data->aLevels[i].iMemoryClock < tmpMem || 
+								device.PollPerfLvls(false).Data->aLevels[i].iVddc < tmpVddc)
+							{
+								LOGGROUP(Log_Warning, "Main") << "Performance level " << i << "'s values are lower then " << perfLevel << "'s specified clocks.";
+							}
+							
 					}
 			}
 
