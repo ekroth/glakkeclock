@@ -118,6 +118,7 @@ void Adapter::ResetPolled()
 // Static
 void Device::CreateDevices(DeviceVector &devices)
 {	
+	// TODO: Adapters on HEAP
 	LOGGROUP(Log_Debug, "Device") << "Generating device(s)..";
 	int numAdapters = 0;
 	ADLManager::ADL_Adapter_NumberOfAdapters_Get(&numAdapters);
@@ -127,18 +128,30 @@ void Device::CreateDevices(DeviceVector &devices)
 	
 	for (int i = 0; i < numAdapters; i++)
 	{
+		LOGGROUP(Log_Debug, "Device") << "-- New adapter: ";
+		LOGGROUP(Log_Debug, "Device") << "iAdapterIndex: " << globalAdapters[i].iAdapterIndex;
+		LOGGROUP(Log_Debug, "Device") << "iDeviceNumber: " << globalAdapters[i].iDeviceNumber;
+		LOGGROUP(Log_Debug, "Device") << "strUDID: " << globalAdapters[i].strUDID;
+		LOGGROUP(Log_Debug, "Device") << "iDrvIndex: " << globalAdapters[i].iDrvIndex;
+		
 		bool alreadyExists = false;
 		for (DeviceVector::iterator dev = devices.begin(); dev != devices.end(); dev++)
-			if ((*dev)->udid == globalAdapters[i].strUDID)
+			if ((*dev)->GetUDID() == globalAdapters[i].strUDID)
+			{
 				alreadyExists = true;
+				(*dev)->adapters.push_back(Adapter(*dev, globalAdapters[i]));
+				LOGGROUP(Log_Debug, "Device") << "Added adapter to existing device.";
+			}
 			
 		if (alreadyExists)
 			continue;
 		
 		// No previous device, create new
-		Device *device = new Device(globalAdapters[i].strUDID, globalAdapters[i].strAdapterName);
+		Device *device = new Device();
 		device->adapters.push_back(Adapter(device, globalAdapters[i]));
 		devices.push_back(device);
+		
+		LOGGROUP(Log_Debug, "Device") << "Created new device for adapter.";
 	}
 	
 	LOGGROUP(Log_Debug, "Device") << "..successfully created " << devices.size() << " device(s), with " << numAdapters << " adapter(s).";
@@ -165,15 +178,14 @@ void Device::CreateDevices(DeviceVector &devices)
 		}
 	} while (bubbleChange);
 	
+	LOGGROUP(Log_Debug, "Device") << "..done sorting.";
+	
 	// Force sort adapters on devices
 	for (uint i = 0; i < devices.size(); i++)
 		devices[i]->sortAdapters();
-	
-	LOGGROUP(Log_Debug, "Device") << "..done sorting.";
 }
 
-Device::Device(const string &udid, const string &name):
-	udid(udid),
+Device::Device():
 	adapterIndexDefault(0),
 	thermalControlDefault(0)
 {
@@ -420,6 +432,7 @@ int Device::GetPollAdapter() const
 void Device::DetectAdapters()
 {
 	LOGGROUP(Log_Debug, "Device") << "Detecting adapters for specific device..";
+	const string oldUdid = GetUDID();
 	int numAdapters = 0;
 	ADLManager::ADL_Adapter_NumberOfAdapters_Get(&numAdapters);
 	AdapterInfo globalAdapters[numAdapters];
@@ -431,7 +444,7 @@ void Device::DetectAdapters()
 	bool firstFound = true;
 	
 	for (int i = 0; i < numAdapters; i++)
-		if (string(globalAdapters[i].strUDID) == udid)
+		if (string(globalAdapters[i].strUDID) == oldUdid)
 		{
 			if (firstFound)
 			{

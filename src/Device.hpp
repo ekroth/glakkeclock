@@ -128,7 +128,7 @@ namespace kke
 		
 	public:
 		
-		Device(const std::string &udid, const std::string &name);
+		Device();
 		~Device();
 		
 		const DBiosInfo& PollBios(bool refresh = false);
@@ -165,8 +165,6 @@ namespace kke
 		void ResetPolled();
 	private:
 		void sortAdapters();
-		
-		std::string udid;
 		
 		DBiosInfo bios;
 		DAccess access;
