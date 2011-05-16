@@ -177,7 +177,7 @@ namespace kke
 		DPerfLvls defPerfLevels;
 		DDisplayCount displayCount;
 		
-		int adapterIndexDefault;
+		int pollAdapter;
 		int thermalControlDefault;
 		
 		AdapterVector adapters;
