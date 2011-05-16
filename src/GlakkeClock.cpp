@@ -179,7 +179,7 @@ void GlakkeClock::output()
 			if (ArgParser::Instance().GetInt(ArgCpollAdaptIndex) < 0 || ArgParser::Instance().GetInt(ArgCpollAdaptIndex) >= (int)device.GetAdapters().size())
 			{
 				LOGGROUP(Log_Error, "Main") << "Polling adapter out of range. Valid: " << 0 << '-' << (device.GetAdapters().size() - 1);
-				break;
+				continue;
 			}
 			else
 			{
