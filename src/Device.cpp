@@ -193,6 +193,8 @@ Device::Device():
 
 Device::~Device()
 {
+	for (AdapterVector::iterator it = adapters.begin(); it != adapters.end(); it++)
+		delete *it;
 }
 
 const kke::DAccess& Device::PollAccess(bool refresh)
