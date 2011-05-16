@@ -336,7 +336,7 @@ bool Device::ODSetLevels(const std::vector< ADLODPerformanceLevel > &levels)
 
 bool Device::ODSetOneLevel(int index, int engine, int memory, int vddc)
 {
-	kke::DPerfLvls lvls = PollPerfLvls(false, true);
+	const DPerfLvls &lvls = PollPerfLvls(false, true);
 	if (!lvls.Valid)
 		return false;
 	
@@ -361,7 +361,7 @@ bool Device::ODSetOneLevel(int index, int engine, int memory, int vddc)
 
 bool Device::ODSetAllLevels(int engine, int memory, int vddc)
 {
-	kke::DPerfLvls lvls = PollPerfLvls(true, true);
+	const DPerfLvls &lvls = PollPerfLvls(true, true);
 	if (!lvls.Valid)
 		return false;
 	
@@ -384,12 +384,13 @@ bool Device::ODSetAllLevels(int engine, int memory, int vddc)
 
 bool Device::ODResetAllLevels()
 {
-	kke::DPerfLvls lvls = PollPerfLvls(true, true);
+	const DPerfLvls &lvls = PollPerfLvls(true, true);
 	if (!lvls.Valid)
 		return false;
 	
-	ADLODPerformanceLevels *perfLevelsNew = (ADLODPerformanceLevels*)malloc(sizeof(ADLODPerformanceLevels) + sizeof(ADLODPerformanceLevel) * (lvls.Data.size() - 1));
-	perfLevelsNew->iSize = sizeof(ADLODPerformanceLevels) + sizeof(ADLODPerformanceLevel) * (lvls.Data.size() - 1);
+	const size_t size = sizeof(ADLODPerformanceLevels) + sizeof(ADLODPerformanceLevel) * (lvls.Data.size() - 1);
+	ADLODPerformanceLevels *perfLevelsNew = (ADLODPerformanceLevels*)malloc(size);
+	perfLevelsNew->iSize = size;
 	
 	for (uint i = 0; i < lvls.Data.size(); i++)
 		perfLevelsNew->aLevels[i] = lvls.Data[i];

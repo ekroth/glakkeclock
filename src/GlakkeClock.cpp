@@ -367,7 +367,7 @@ void GlakkeClock::output()
 		// --- Overclocking
 		if (ArgParser::Instance().Exist(kke::ArgOSclocksGpu) || ArgParser::Instance().Exist(kke::ArgOSclocksMem) || ArgParser::Instance().Exist(kke::ArgOSclocksVddc) 
 		|| ArgParser::Instance().Exist(kke::ArgOSfan) || ArgParser::Instance().Exist(kke::ArgOSfanReset)
-		|| ArgParser::Instance().Exist(kke::ArgOSclocksGpuReset) || ArgParser::Instance().Exist(kke::ArgOSclocksMemReset) || ArgParser::Instance().Exist(kke::ArgOSclocksVddcReset)
+// 		|| ArgParser::Instance().Exist(kke::ArgOSclocksGpuReset) || ArgParser::Instance().Exist(kke::ArgOSclocksMemReset) || ArgParser::Instance().Exist(kke::ArgOSclocksVddcReset)
 		|| ArgParser::Instance().Exist(kke::ArgOSclocksReset))
 		{
 			if (startDevice != endDevice - 1)
@@ -376,112 +376,109 @@ void GlakkeClock::output()
 				LOGGROUP(Log_Debug, "Main") << "TODO: Be able to bypass this?";
 				continue;
 			}
-			
-			{
-				int tmpGpu = ArgParser::Instance().GetInt(kke::ArgOSclocksGpu, 0) * 100, 
-					tmpMem = ArgParser::Instance().GetInt(kke::ArgOSclocksMem, 0) * 100, 
-					tmpVddc = ArgParser::Instance().GetInt(kke::ArgOSclocksVddc, 0);
-					
-				if (device.PollODParams().Valid)
-				{
-					if (tmpGpu != 0 && (tmpGpu < device.PollODParams().Data.sEngineClock.iMin || tmpGpu > device.PollODParams().Data.sEngineClock.iMax))
-					{
-						LOGGROUP(Log_Error, "Main") << "GPU speed not within range.";
-						tmpGpu = 0;
-					}
-					
-					if (tmpMem != 0 &&(tmpMem < device.PollODParams().Data.sMemoryClock.iMin || tmpMem > device.PollODParams().Data.sMemoryClock.iMax))
-					{
-						LOGGROUP(Log_Error, "Main") << "Memory speed not within range.";
-						tmpMem = 0;
-					}
-					
-					if (tmpVddc != 0 && (tmpVddc < device.PollODParams().Data.sVddc.iMin || tmpVddc > device.PollODParams().Data.sVddc.iMax))
-					{
-						LOGGROUP(Log_Error, "Main") << "VDDC not within range.";
-						tmpVddc = 0;
-					}
-					
-					if (tmpGpu != 0 || tmpMem != 0 || tmpVddc != 0)
-						if (!device.ODSetAllLevels(tmpGpu, tmpMem, tmpVddc))
-						{
-							LOGGROUP(Log_Error, "Main") << "Error when setting clocks/vddc.";
-						}
-				}
-
-				if (ArgParser::Instance().Exist(kke::ArgOSclocksReset)  || ArgParser::Instance().Exist(kke::ArgOSallReset))
-				{
-					if (device.PollPerfLvls(true).Valid)
-					{
-						if (!device.ODSetLevels(device.PollPerfLvls(true).Data))
-						{
-							LOGGROUP(Log_Error, "Main") << "Error when setting performance levels.";
-						}
-					}
-				}
-			}
-		}
-
-		// --- Fan
-		if (ArgParser::Instance().Exist(kke::ArgOSfan))
-		{
-			if (device.PollFanInfo().Valid && device.PollFanSpeed().Valid)
-			{
-				if (ArgParser::Instance().GetString(kke::ArgOCfanType, "Percent") == "Percent")
-				{
-					if (ArgParser::Instance().GetInt(kke::ArgOSfan) < device.PollFanInfo().Data.iMinPercent || ArgParser::Instance().GetInt(kke::ArgOSfan) > device.PollFanInfo().Data.iMaxPercent)
-					{
-						LOGGROUP(Log_Error, "Main") << "Fan value is incorrect. Valid are (PERCENT): " << device.PollFanInfo().Data.iMinPercent << "-" << device.PollFanInfo().Data.iMaxPercent;
-					}
-					else
-					{
-						if (!device.ODSetFan(ArgParser::Instance().GetInt(kke::ArgOSfan), ADL_DL_FANCTRL_SPEED_TYPE_PERCENT))
-						{
-							LOGGROUP(Log_Error, "Main") << "Setting fan speed failed (PERCENT)." << endl;
-						}
-					}
-				}
-				else // RPM
-				{
-					if (ArgParser::Instance().GetInt(kke::ArgOSfan) < device.PollFanInfo().Data.iMinRPM || ArgParser::Instance().GetInt(kke::ArgOSfan) > device.PollFanInfo().Data.iMaxRPM)
-					{
-						LOGGROUP(Log_Error, "Main") << "Fan value is invalid. Valid are (RPM): " << device.PollFanInfo().Data.iMinRPM << "-" << device.PollFanInfo().Data.iMaxRPM;
-					}
-					else
-					{
-						if (!device.ODSetFan(ArgParser::Instance().GetInt(kke::ArgOSfan), ADL_DL_FANCTRL_SPEED_TYPE_RPM))
-						{
-							LOGGROUP(Log_Error, "Main") << "Setting fan speed failed (RPM).";
-						}
-					}
-				}
-			}
-		}
-	
-		if (ArgParser::Instance().Exist(kke::ArgOSfanReset) || ArgParser::Instance().Exist(kke::ArgOSallReset))
-		{
-			// Set default fan
-			if (!device.ODSetFanDefault())
-			{
-				LOGGROUP(Log_Error, "Main") << "Error when setting default fan speed." << endl;
-			}
-		}
 		
-		// Display
-	
-		if (ArgParser::Instance().Exist(kke::ArgDGConDisplays) || ArgParser::Instance().Exist(kke::ArgDGMapDisplays) || ArgParser::Instance().Exist(kke::ArgDGAllDisplays))
-		{
-			for (kke::DisplayVector::iterator disp = device.GetDisplays().begin(); disp != device.GetDisplays().end(); disp++)
-			{			
-				if (ArgParser::Instance().Exist(kke::ArgDGAllDisplays) || (disp->IsConnected() && ArgParser::Instance().Exist(kke::ArgDGConDisplays)) ||
-					(disp->IsMapped() && ArgParser::Instance().Exist(kke::ArgDGMapDisplays)))
-				{					
-					cout << "Name: " << disp->GetInfo().strDisplayName << endl;
-					cout << "Manufacturer: " << disp->GetInfo().strDisplayManufacturerName << endl;
-					
-					cout << "Connected: " << (disp->IsConnected() ? "Yes" : "No") << endl;
-					cout << "Mapped: " << (disp->IsMapped() ? "Yes" : "No") << endl;
-	// 					cout << "Connector: " << disp->GetInfo().
+			int tmpGpu = ArgParser::Instance().GetInt(kke::ArgOSclocksGpu, 0) * 100, 
+				tmpMem = ArgParser::Instance().GetInt(kke::ArgOSclocksMem, 0) * 100, 
+				tmpVddc = ArgParser::Instance().GetInt(kke::ArgOSclocksVddc, 0);
+				
+			if (device.PollODParams().Valid)
+			{
+				if (tmpGpu != 0 && (tmpGpu < device.PollODParams().Data.sEngineClock.iMin || tmpGpu > device.PollODParams().Data.sEngineClock.iMax))
+				{
+					LOGGROUP(Log_Error, "Main") << "GPU speed not within range.";
+					tmpGpu = 0;
+				}
+				
+				if (tmpMem != 0 &&(tmpMem < device.PollODParams().Data.sMemoryClock.iMin || tmpMem > device.PollODParams().Data.sMemoryClock.iMax))
+				{
+					LOGGROUP(Log_Error, "Main") << "Memory speed not within range.";
+					tmpMem = 0;
+				}
+				
+				if (tmpVddc != 0 && (tmpVddc < device.PollODParams().Data.sVddc.iMin || tmpVddc > device.PollODParams().Data.sVddc.iMax))
+				{
+					LOGGROUP(Log_Error, "Main") << "VDDC not within range.";
+					tmpVddc = 0;
+				}
+				
+				if (tmpGpu != 0 || tmpMem != 0 || tmpVddc != 0)
+					if (!device.ODSetAllLevels(tmpGpu, tmpMem, tmpVddc))
+					{
+						LOGGROUP(Log_Error, "Main") << "Error when setting clocks/vddc.";
+					}
+			}
+
+			if (ArgParser::Instance().Exist(kke::ArgOSclocksReset)  || ArgParser::Instance().Exist(kke::ArgOSallReset))
+			{
+				if (device.PollPerfLvls(true).Valid)
+				{
+					if (!device.ODSetLevels(device.PollPerfLvls(true).Data))
+					{
+						LOGGROUP(Log_Error, "Main") << "Error when setting performance levels.";
+					}
+				}
+			}
+			
+			if (ArgParser::Instance().Exist(kke::ArgOSfanReset) || ArgParser::Instance().Exist(kke::ArgOSallReset))
+			{
+				// Set default fan
+				if (!device.ODSetFanDefault())
+				{
+					LOGGROUP(Log_Error, "Main") << "Error when setting default fan speed." << endl;
+				}
+			}
+			
+			// --- Fan
+			if (ArgParser::Instance().Exist(kke::ArgOSfan))
+			{
+				if (device.PollFanInfo().Valid && device.PollFanSpeed().Valid)
+				{
+					if (ArgParser::Instance().GetString(kke::ArgOCfanType, "Percent") == "Percent")
+					{
+						if (ArgParser::Instance().GetInt(kke::ArgOSfan) < device.PollFanInfo().Data.iMinPercent || ArgParser::Instance().GetInt(kke::ArgOSfan) > device.PollFanInfo().Data.iMaxPercent)
+						{
+							LOGGROUP(Log_Error, "Main") << "Fan value is incorrect. Valid are (PERCENT): " << device.PollFanInfo().Data.iMinPercent << "-" << device.PollFanInfo().Data.iMaxPercent;
+						}
+						else
+						{
+							if (!device.ODSetFan(ArgParser::Instance().GetInt(kke::ArgOSfan), ADL_DL_FANCTRL_SPEED_TYPE_PERCENT))
+							{
+								LOGGROUP(Log_Error, "Main") << "Setting fan speed failed (PERCENT)." << endl;
+							}
+						}
+					}
+					else // RPM
+					{
+						if (ArgParser::Instance().GetInt(kke::ArgOSfan) < device.PollFanInfo().Data.iMinRPM || ArgParser::Instance().GetInt(kke::ArgOSfan) > device.PollFanInfo().Data.iMaxRPM)
+						{
+							LOGGROUP(Log_Error, "Main") << "Fan value is invalid. Valid are (RPM): " << device.PollFanInfo().Data.iMinRPM << "-" << device.PollFanInfo().Data.iMaxRPM;
+						}
+						else
+						{
+							if (!device.ODSetFan(ArgParser::Instance().GetInt(kke::ArgOSfan), ADL_DL_FANCTRL_SPEED_TYPE_RPM))
+							{
+								LOGGROUP(Log_Error, "Main") << "Setting fan speed failed (RPM).";
+							}
+						}
+					}
+				}
+			}
+			
+			// Display	
+			if (ArgParser::Instance().Exist(kke::ArgDGConDisplays) || ArgParser::Instance().Exist(kke::ArgDGMapDisplays) || ArgParser::Instance().Exist(kke::ArgDGAllDisplays))
+			{
+				for (kke::DisplayVector::iterator disp = device.GetDisplays().begin(); disp != device.GetDisplays().end(); disp++)
+				{			
+					if (ArgParser::Instance().Exist(kke::ArgDGAllDisplays) || (disp->IsConnected() && ArgParser::Instance().Exist(kke::ArgDGConDisplays)) ||
+						(disp->IsMapped() && ArgParser::Instance().Exist(kke::ArgDGMapDisplays)))
+					{					
+						cout << "Name: " << disp->GetInfo().strDisplayName << endl;
+						cout << "Manufacturer: " << disp->GetInfo().strDisplayManufacturerName << endl;
+						
+						cout << "Connected: " << (disp->IsConnected() ? "Yes" : "No") << endl;
+						cout << "Mapped: " << (disp->IsMapped() ? "Yes" : "No") << endl;
+						// 					cout << "Connector: " << disp->GetInfo().
+					}
 				}
 			}
 		}
@@ -609,9 +606,9 @@ bool GlakkeClock::registerArgs()
 	good = good && ArgParser::Instance().Register (kke::ArgOSclocksVddc, kke::ArgumentInt, "set-clocks-vddc", "OScv", "Set VDDC voltage (mV).");
 	// Set reset
 	good = good && ArgParser::Instance().Register (kke::ArgOSfanReset, kke::ArgumentExist, "set-fan-reset", "OSfr", "Reset fan speed.");
-	good = good && ArgParser::Instance().Register (kke::ArgOSclocksGpuReset, kke::ArgumentExist, "set-clocks-gpu-reset", "OScgr", "Reset GPU clocks.");
-	good = good && ArgParser::Instance().Register (kke::ArgOSclocksMemReset, kke::ArgumentExist, "set-clocks-mem-reset", "OScmr", "Reset Memory clocks.");
-	good = good && ArgParser::Instance().Register (kke::ArgOSclocksVddcReset, kke::ArgumentExist, "set-clocks-vddc-reset", "OScvr", "Reset VDDC voltage.");
+// 	good = good && ArgParser::Instance().Register (kke::ArgOSclocksGpuReset, kke::ArgumentExist, "set-clocks-gpu-reset", "OScgr", "Reset GPU clocks.");
+// 	good = good && ArgParser::Instance().Register (kke::ArgOSclocksMemReset, kke::ArgumentExist, "set-clocks-mem-reset", "OScmr", "Reset Memory clocks.");
+// 	good = good && ArgParser::Instance().Register (kke::ArgOSclocksVddcReset, kke::ArgumentExist, "set-clocks-vddc-reset", "OScvr", "Reset VDDC voltage.");
 	good = good && ArgParser::Instance().Register (kke::ArgOSclocksReset, kke::ArgumentExist, "set-clocks-reset", "OScr", "Reset all clocks.");
 	good = good && ArgParser::Instance().Register (kke::ArgOSallReset, kke::ArgumentExist, "set-all-reset", "OSar", "Reset clocks and fan.");
 	
