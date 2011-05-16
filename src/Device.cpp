@@ -23,7 +23,7 @@
 #include "Debug/Logger.hpp"
 
 #include <iostream>
-#include <string.h>
+#include <cstring>
 
 using namespace kke;
 
@@ -118,7 +118,6 @@ void Adapter::ResetPolled()
 // Static
 void Device::CreateDevices(DeviceVector &devices)
 {	
-	// TODO: Adapters on HEAP
 	LOGGROUP(Log_Debug, "Device") << "Generating device(s)..";
 	int numAdapters = 0;
 	ADLManager::ADL_Adapter_NumberOfAdapters_Get(&numAdapters);
@@ -266,16 +265,17 @@ const kke::DPerfLvls& Device::PollPerfLvls(bool defaultVals, bool refresh)
 {
 	if (!perfLevels.Valid || refresh)
 	{
-		kke::DOdParams params = PollODParams(true);
+		kke::DOdParams &params = PollODParams(true);
 		if (!params.Valid)
 		{
 			perfLevels.Valid = false;
 			return perfLevels;
 		}
 		
-		ADLODPerformanceLevels *perfLevelsNew = (ADLODPerformanceLevels*)malloc(sizeof(ADLODPerformanceLevels) + sizeof(ADLODPerformanceLevel) * (params.Data.iNumberOfPerformanceLevels - 1));
-		memset(perfLevelsNew,'\0', sizeof(ADLODPerformanceLevels) + sizeof(ADLODPerformanceLevel) * (params.Data.iNumberOfPerformanceLevels - 1));
-		perfLevelsNew->iSize = sizeof(ADLODPerformanceLevels) + sizeof(ADLODPerformanceLevel) * (params.Data.iNumberOfPerformanceLevels - 1);
+		const size_t size = sizeof(ADLODPerformanceLevels) + sizeof(ADLODPerformanceLevel) * (params.Data.iNumberOfPerformanceLevels - 1);
+		ADLODPerformanceLevels *perfLevelsNew = (ADLODPerformanceLevels*)malloc(size);
+		memset(perfLevelsNew,'\0', size);
+		perfLevelsNew->iSize = size;
 		
 		perfLevels.Valid = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Get(adapters[pollAdapter]->GetInfo().iAdapterIndex, defaultVals ? ADL_TRUE : ADL_FALSE, perfLevelsNew);
 		
