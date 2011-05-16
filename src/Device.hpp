@@ -178,7 +178,7 @@ namespace kke
 		DDisplayCount displayCount;
 		
 		int pollAdapter;
-		int thermalControlDefault;
+		int pollThermal;
 		
 		AdapterVector adapters;
 		DisplayVector displays;
