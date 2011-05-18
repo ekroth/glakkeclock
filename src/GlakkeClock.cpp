@@ -239,16 +239,18 @@ void GlakkeClock::output()
 
 			if (device.PollFanSpeed().Valid && device.PollFanInfo().Valid)
 			{
-				if (device.PollFanSpeed().Data.iSpeedType == ADL_DL_FANCTRL_SPEED_TYPE_RPM)
-				{
-					cout << "Fan type: RPM" << endl;
-					cout << "Fan speed: " << device.PollFanSpeed().Data.iFanSpeed << " [" << device.PollFanInfo().Data.iMinRPM << '-' << device.PollFanInfo().Data.iMaxRPM << ']' << endl;
-				}
-				else
-				{
-					cout << "Fan type: Percent" << endl;
-					cout << "Fan speed: " << device.PollFanSpeed().Data.iFanSpeed << " [" << device.PollFanInfo().Data.iMinPercent << '-' << device.PollFanInfo().Data.iMaxPercent << ']' << endl;
-				}
+// 				int speedType = ArgParser::Instance().GetString(kke::ArgOCfanType, "Percent") == "RPM" ? ADL_DL_FANCTRL_SPEED_TYPE_RPM : ADL_DL_FANCTRL_SPEED_TYPE_PERCENT;
+// 				if (speedType == ADL_DL_FANCTRL_SPEED_TYPE_RPM)
+// 				{
+// 					cout << "Fan speed: " << device.PollFanSpeed(speedType).Data.iFanSpeed << " [" << device.PollFanInfo().Data.iMinRPM << '-' << device.PollFanInfo().Data.iMaxRPM << ']' << endl;
+// 				}
+// 				else
+// 				{
+// 					cout << "Fan speed: " << device.PollFanSpeed(speedType).Data.iFanSpeed << " % [" << device.PollFanInfo().Data.iMinPercent << '-' << device.PollFanInfo().Data.iMaxPercent << ']' << endl;
+// 				}
+
+				cout << "Fan RPM: " << device.PollFanSpeed(ADL_DL_FANCTRL_SPEED_TYPE_RPM).Data.iFanSpeed << " [" << device.PollFanInfo().Data.iMinRPM << '-' << device.PollFanInfo().Data.iMaxRPM << ']' << endl;
+				cout << "Fan percent: " << device.PollFanSpeed(ADL_DL_FANCTRL_SPEED_TYPE_PERCENT).Data.iFanSpeed << " % [" << device.PollFanInfo().Data.iMinPercent << '-' << device.PollFanInfo().Data.iMaxPercent << ']' << endl;
 			}
 			
 			if (device.PollActivity().Valid)
@@ -350,27 +352,13 @@ void GlakkeClock::output()
 			else
 				cout << device.PollActivity().Data.iVddc << endl;
 		}
-		
-		// Fan
-		if (ArgParser::Instance().Exist(kke::ArgOGfanType))
-		{
-			if (device.PollFanSpeed().Valid && device.PollFanInfo().Valid)
-			{
-				if (device.PollFanSpeed().Data.iSpeedType == ADL_DL_FANCTRL_SPEED_TYPE_RPM)
-					cout << "RPM" << endl;
-				else
-					cout << "Percent" << endl;
-			}
-		}
-		
+
 		if (ArgParser::Instance().Exist(kke::ArgOGfan))
 		{
 			if (device.PollFanSpeed().Valid && device.PollFanInfo().Valid)
 			{
-				if (ArgParser::Instance().GetString(kke::ArgOCfanType, "Percent") == "RPM")
-					cout << device.PollFanSpeed().Data.iFanSpeed << endl;
-				else // Calculate percentage
-					cout << (int)((float)device.PollFanSpeed().Data.iFanSpeed / device.PollFanInfo().Data.iMaxRPM * 100.0f) << endl;
+				int speedType = ArgParser::Instance().GetString(kke::ArgOCfanType, "Percent") == "RPM" ? ADL_DL_FANCTRL_SPEED_TYPE_RPM : ADL_DL_FANCTRL_SPEED_TYPE_PERCENT;
+				cout << device.PollFanSpeed(speedType).Data.iFanSpeed << endl;
 			}
 		}
 		
@@ -553,12 +541,9 @@ void GlakkeClock::output()
 						{
 							LOGGROUP(Log_Error, "Main") << "Fan value is incorrect. Valid are (PERCENT): " << device.PollFanInfo().Data.iMinPercent << "-" << device.PollFanInfo().Data.iMaxPercent;
 						}
-						else
+						else if (!device.ODSetFan(ArgParser::Instance().GetInt(kke::ArgOSfan), ADL_DL_FANCTRL_SPEED_TYPE_PERCENT))
 						{
-							if (!device.ODSetFan(ArgParser::Instance().GetInt(kke::ArgOSfan), ADL_DL_FANCTRL_SPEED_TYPE_PERCENT))
-							{
-								LOGGROUP(Log_Error, "Main") << "Setting fan speed failed (PERCENT)." << endl;
-							}
+							LOGGROUP(Log_Error, "Main") << "Setting fan speed failed (PERCENT)." << endl;
 						}
 					}
 					else // RPM
@@ -568,12 +553,9 @@ void GlakkeClock::output()
 						{
 							LOGGROUP(Log_Error, "Main") << "Fan value is invalid. Valid are (RPM): " << device.PollFanInfo().Data.iMinRPM << "-" << device.PollFanInfo().Data.iMaxRPM;
 						}
-						else
+						else if (!device.ODSetFan(ArgParser::Instance().GetInt(kke::ArgOSfan), ADL_DL_FANCTRL_SPEED_TYPE_RPM))
 						{
-							if (!device.ODSetFan(ArgParser::Instance().GetInt(kke::ArgOSfan), ADL_DL_FANCTRL_SPEED_TYPE_RPM))
-							{
-								LOGGROUP(Log_Error, "Main") << "Setting fan speed failed (RPM).";
-							}
+							LOGGROUP(Log_Error, "Main") << "Setting fan speed failed (RPM).";
 						}
 					}
 				}
@@ -712,7 +694,6 @@ bool GlakkeClock::registerArgs()
 
 	// Device fan
 	good = good && ArgParser::Instance().Register (kke::ArgOCfanType, kke::ArgumentString, "fan-type", "OCft", "Choose fan type (RPM, Percent (default)).");
-	good = good && ArgParser::Instance().Register (kke::ArgOGfanType, kke::ArgumentExist, "get-fan-type", "OGft", "Fan type (RPM, percent).");
 	good = good && ArgParser::Instance().Register (kke::ArgOGfan, kke::ArgumentExist, "get-fan", "OGf", "Fan speed.");
 	good = good && ArgParser::Instance().Register (kke::ArgOGfanMin, kke::ArgumentExist, "get-fan-min", "OGfmi", "Minimum fan speed.");
 	good = good && ArgParser::Instance().Register (kke::ArgOGfanMax, kke::ArgumentExist, "get-fan-max", "OGfma", "Maximum fan speed.");

@@ -136,7 +136,7 @@ namespace kke
 		const DActivity& PollActivity(bool refresh = false);
 		const DTemperature& PollTemperature(bool refresh = false);
 		const DFanInfo& PollFanInfo(bool refresh = false);
-		const DFanSpeed& PollFanSpeed(bool refresh = false);
+		const DFanSpeed& PollFanSpeed(int speedType = ADL_DL_FANCTRL_SPEED_TYPE_PERCENT, bool refresh = false);
 		const DOdParams& PollODParams(bool refresh = false);
 		const DPerfLvls& PollPerfLvls(bool defaultVals, bool refresh = false);
 		const DDisplayCount& PollDisplayCount(bool refresh = false);

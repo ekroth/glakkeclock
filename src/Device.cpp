@@ -254,10 +254,13 @@ const kke::DFanInfo& Device::PollFanInfo(bool refresh)
 	return fanInfo;
 }
 
-const kke::DFanSpeed& Device::PollFanSpeed(bool refresh)
+const kke::DFanSpeed& Device::PollFanSpeed(int speedType, bool refresh)
 {
-	if (!fanSpeed.Valid || refresh)
+	if (!fanSpeed.Valid || refresh || fanSpeed.Data.iSpeedType != speedType)
+	{
+		fanSpeed.Data.iSpeedType = speedType;
 		fanSpeed.Valid = ADLManager::ADL_Overdrive5_FanSpeed_Get(adapters[pollAdapter]->GetInfo().iAdapterIndex, pollThermal, &fanSpeed.Data);
+	}
 	
 	return fanSpeed;
 }

@@ -41,7 +41,6 @@ namespace kke
 		ArgCdeviceName,
 		ArgCdeviceUdid,
 		ArgCdeviceIndex,
-// 		ArgCadapter,
 		ArgCperfLevel,
 		ArgCpollAdaptIndex,
 		ArgCperfValue,
@@ -68,7 +67,6 @@ namespace kke
 		ArgOGtemperature,
 		
 		ArgOCfanType,
-		ArgOGfanType,
 		ArgOGfan,
 		ArgOGfanMin,
 		ArgOGfanMax,
