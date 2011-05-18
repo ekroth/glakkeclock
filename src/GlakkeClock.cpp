@@ -91,10 +91,10 @@ void GlakkeClock::output()
 	kke::DeviceVector devices;
 	Device::CreateDevices(devices);
 	
-	for (kke::DeviceVector::iterator it = devices.begin(); it != devices.end(); it++)
-	{
-		(*it)->DetectDisplays();
-	}
+// 	for (kke::DeviceVector::iterator it = devices.begin(); it != devices.end(); it++)
+// 	{
+// 		(*it)->DetectDisplays();
+// 	}
 	
 	uint startDevice = 0, endDevice = devices.size(), perfLevel = ArgParser::Instance().GetInt(kke::ArgCperfLevel, 0);
 	
