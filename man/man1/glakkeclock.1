@@ -314,12 +314,12 @@ Returns the maximum frequency possible of memory on specific device.
 Return fan speed value by RPM.
 .RE
 
-.B --device-index 0 --set-clocks-gpu 675 -Cpl 0
+.B --device-index 0 --set-clocks-gpu 675 --perf-level 0
 .RS
 Set GPU clock to 675 MHz, on performance level 0. This could fail if the value is higher than higher performance levels.
 .RE
 
-.B --device-index 0 --set-clocks-vddc 1263 -Cpl 1 --toggle-clocks-smooth
+.B --device-index 0 --set-clocks-vddc 1263 --perf-level 1 --toggle-clocks-smooth
 .RS
 Set VDDC to 1263 mV on performance level 1. Lower perf levels will have lower or equal value, higher perf levels will have higher or equal value.
 .RE
