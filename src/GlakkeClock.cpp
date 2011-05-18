@@ -391,10 +391,9 @@ void GlakkeClock::output()
 		|| ArgParser::Instance().Exist(kke::ArgOSclocksGpuReset) || ArgParser::Instance().Exist(kke::ArgOSclocksMemReset) || ArgParser::Instance().Exist(kke::ArgOSclocksVddcReset)
 		|| ArgParser::Instance().Exist(kke::ArgOSPerfReset) || ArgParser::Instance().Exist(kke::ArgOSPerfAllReset))
 		{
-			if (startDevice != endDevice - 1)
+			if (startDevice != endDevice - 1 && !ArgParser::Instance().Exist(kke::ArgAllCards))
 			{
 				LOGGROUP(Log_Error, "Main") << "You should probably not set clocks/fan on ALL devices, see -h, --help.";
-				LOGGROUP(Log_Debug, "Main") << "TODO: Be able to bypass this?";
 				continue;
 			}
 		
@@ -660,6 +659,7 @@ bool GlakkeClock::registerArgs()
 	good = good && ArgParser::Instance().Register (kke::ArgDebug, kke::ArgumentExist, "debug", "d", "Output debug messages.");
 	good = good && ArgParser::Instance().Register (kke::ArgColor, kke::ArgumentExist, "color", "c", "Output colored messages.");
 	good = good && ArgParser::Instance().Register (kke::ArgBypass, kke::ArgumentExist, "ignore-limits", "il", "Ignore limits, use with caution!");
+	good = good && ArgParser::Instance().Register (kke::ArgAllCards, kke::ArgumentExist, "all-cards", "al", "Set clocks on multiple cards.");
 
 	// Device options
 	good = good && ArgParser::Instance().Register (kke::ArgCdeviceName, kke::ArgumentString, "device-name", "Cdn", "Choose device by name.");
