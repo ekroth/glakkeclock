@@ -36,8 +36,6 @@ namespace kke
 		ArgVersion,
 		ArgDebug,
 		ArgColor,
-		ArgBypass,
-		ArgAllCards,
 		
 		ArgCdeviceName,
 		ArgCdeviceUdid,
@@ -46,6 +44,10 @@ namespace kke
 		ArgCpollAdaptIndex,
 		ArgCperfValue,
 		ArgCperfDefValue,
+		ArgBypass,
+		ArgAllCards,
+		ArgPollMin,
+		ArgPollMax,
 		
 		ArgHGinfo,
 		ArgHGinfoLevels,
@@ -69,16 +71,14 @@ namespace kke
 		
 		ArgOCfanType,
 		ArgOGfan,
-		ArgOGfanMin,
-		ArgOGfanMax,
 		ArgOSfan,
 		
+		ArgOSclockSmooth,
 		ArgOSclocksGpu,
 		ArgOSclocksMem,
 		ArgOSclocksVddc,
 		
 		ArgOSfanReset,
-		ArgOSclockSmooth,
 		ArgOSclocksGpuReset,
 		ArgOSclocksMemReset,
 		ArgOSclocksVddcReset,
