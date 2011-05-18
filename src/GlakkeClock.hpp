@@ -79,10 +79,12 @@ namespace kke
 		ArgOSclocksVddc,
 		
 		ArgOSfanReset,
-// 		ArgOSclocksGpuReset,
-// 		ArgOSclocksMemReset,
-// 		ArgOSclocksVddcReset,
-		ArgOSclocksReset,
+		ArgOSclockSmooth,
+		ArgOSclocksGpuReset,
+		ArgOSclocksMemReset,
+		ArgOSclocksVddcReset,
+		ArgOSPerfReset,
+		ArgOSPerfAllReset,
 		ArgOSallReset,
 		
 // 		ArgCdisplay,

@@ -400,8 +400,8 @@ void GlakkeClock::output()
 		// --- Overclocking
 		if (ArgParser::Instance().Exist(kke::ArgOSclocksGpu) || ArgParser::Instance().Exist(kke::ArgOSclocksMem) || ArgParser::Instance().Exist(kke::ArgOSclocksVddc) 
 		|| ArgParser::Instance().Exist(kke::ArgOSfan) || ArgParser::Instance().Exist(kke::ArgOSfanReset)
-// 		|| ArgParser::Instance().Exist(kke::ArgOSclocksGpuReset) || ArgParser::Instance().Exist(kke::ArgOSclocksMemReset) || ArgParser::Instance().Exist(kke::ArgOSclocksVddcReset)
-		|| ArgParser::Instance().Exist(kke::ArgOSclocksReset))
+		|| ArgParser::Instance().Exist(kke::ArgOSclocksGpuReset) || ArgParser::Instance().Exist(kke::ArgOSclocksMemReset) || ArgParser::Instance().Exist(kke::ArgOSclocksVddcReset)
+		|| ArgParser::Instance().Exist(kke::ArgOSPerfReset) || ArgParser::Instance().Exist(kke::ArgOSPerfAllReset))
 		{
 			if (startDevice != endDevice - 1)
 			{
@@ -414,6 +414,15 @@ void GlakkeClock::output()
 				tmpMem = ArgParser::Instance().GetInt(kke::ArgOSclocksMem, 0) * 100, 
 				tmpVddc = ArgParser::Instance().GetInt(kke::ArgOSclocksVddc, 0);
 				
+			if (ArgParser::Instance().Exist(kke::ArgOSclocksGpuReset) || ArgParser::Instance().Exist(kke::ArgOSPerfReset))
+				tmpGpu = device.PollPerfLvls(true).Data->aLevels[perfLevel].iEngineClock;
+			
+			if (ArgParser::Instance().Exist(kke::ArgOSclocksMemReset) || ArgParser::Instance().Exist(kke::ArgOSPerfReset))
+				tmpMem = device.PollPerfLvls(true).Data->aLevels[perfLevel].iMemoryClock;
+			
+			if (ArgParser::Instance().Exist(kke::ArgOSclocksVddcReset) || ArgParser::Instance().Exist(kke::ArgOSPerfReset))
+				tmpVddc = device.PollPerfLvls(true).Data->aLevels[perfLevel].iVddc;
+			
 			if (device.PollODParams().Valid)
 			{
 				if (!ArgParser::Instance().Exist(kke::ArgBypass) &&
@@ -438,6 +447,50 @@ void GlakkeClock::output()
 				}
 				
 				if (tmpGpu != 0 || tmpMem != 0 || tmpVddc != 0)
+				{
+					if (ArgParser::Instance().Exist(kke::ArgOSclockSmooth))
+					{
+						// Make sure perf level values are growing
+						for (uint i = 0; i < (uint)device.PollODParams().Data.iNumberOfPerformanceLevels; i++)
+						{
+							int perfGpu = 0, perfMem = 0, perfVddc = 0;
+							
+							if (i == perfLevel)
+								continue;
+							
+							if (i < perfLevel)
+							{
+								// Lower or equal
+								if (device.PollPerfLvls(false).Data->aLevels[i].iEngineClock > tmpGpu)
+									perfGpu = tmpGpu;
+								
+								if (device.PollPerfLvls(false).Data->aLevels[i].iMemoryClock > tmpMem)
+									perfMem = tmpMem;
+								
+								if (device.PollPerfLvls(false).Data->aLevels[i].iVddc > tmpVddc)
+									perfVddc = tmpVddc;
+							}
+							else if (i > perfLevel)
+							{
+								// Higher or equal
+								if (device.PollPerfLvls(false).Data->aLevels[i].iEngineClock < tmpGpu)
+									perfGpu = tmpGpu;
+								
+								if (device.PollPerfLvls(false).Data->aLevels[i].iMemoryClock < tmpMem)
+									perfMem = tmpMem;
+								
+								if (device.PollPerfLvls(false).Data->aLevels[i].iVddc < tmpVddc)
+									perfVddc = tmpVddc;
+							}
+							
+							if (perfGpu != 0 || perfMem != 0 || perfVddc != 0)
+								if (!device.ODSetOneLevel(i, perfGpu, perfMem, perfVddc))
+								{
+									LOGGROUP(Log_Error, "Main") << "Error when smoothing clocks/vddc on level: " << i;
+								}
+						}
+						
+					}
 					if (!device.ODSetOneLevel(perfLevel, tmpGpu, tmpMem, tmpVddc))
 					{
 						LOGGROUP(Log_Error, "Main") << "Error when setting clocks/vddc.";
@@ -459,8 +512,8 @@ void GlakkeClock::output()
 							else
 							{
 								if (device.PollPerfLvls(false).Data->aLevels[i].iEngineClock > tmpGpu ||
-								device.PollPerfLvls(false).Data->aLevels[i].iMemoryClock > tmpMem || 
-								device.PollPerfLvls(false).Data->aLevels[i].iVddc > tmpVddc)
+									device.PollPerfLvls(false).Data->aLevels[i].iMemoryClock > tmpMem || 
+									device.PollPerfLvls(false).Data->aLevels[i].iVddc > tmpVddc)
 								{
 									LOGGROUP(Log_Warning, "Main") << "Performance level " << i << "'s values are higher then " << perfLevel << "'s specified clocks.";
 								}
@@ -468,9 +521,10 @@ void GlakkeClock::output()
 						}
 							
 					}
+				}
 			}
 
-			if (ArgParser::Instance().Exist(kke::ArgOSclocksReset)  || ArgParser::Instance().Exist(kke::ArgOSallReset))
+			if (ArgParser::Instance().Exist(kke::ArgOSPerfAllReset)  || ArgParser::Instance().Exist(kke::ArgOSallReset))
 			{
 				if (!device.ODResetAllLevels())
 				{
@@ -668,15 +722,18 @@ bool GlakkeClock::registerArgs()
 	good = good && ArgParser::Instance().Register (kke::ArgOSclocksGpu, kke::ArgumentInt, "set-clocks-gpu", "OScg", "Set GPU speed (MHz).");
 	good = good && ArgParser::Instance().Register (kke::ArgOSclocksMem, kke::ArgumentInt, "set-clocks-mem", "OScm", "Set Memory speed (MHz).");
 	good = good && ArgParser::Instance().Register (kke::ArgOSclocksVddc, kke::ArgumentInt, "set-clocks-vddc", "OScv", "Set VDDC voltage (mV).");
+	
 	// Set reset
 	good = good && ArgParser::Instance().Register (kke::ArgOSfanReset, kke::ArgumentExist, "set-fan-reset", "OSfr", "Reset fan speed.");
-// 	good = good && ArgParser::Instance().Register (kke::ArgOSclocksGpuReset, kke::ArgumentExist, "set-clocks-gpu-reset", "OScgr", "Reset GPU clocks.");
-// 	good = good && ArgParser::Instance().Register (kke::ArgOSclocksMemReset, kke::ArgumentExist, "set-clocks-mem-reset", "OScmr", "Reset Memory clocks.");
-// 	good = good && ArgParser::Instance().Register (kke::ArgOSclocksVddcReset, kke::ArgumentExist, "set-clocks-vddc-reset", "OScvr", "Reset VDDC voltage.");
-	good = good && ArgParser::Instance().Register (kke::ArgOSclocksReset, kke::ArgumentExist, "set-clocks-reset", "OScr", "Reset all clocks.");
-	good = good && ArgParser::Instance().Register (kke::ArgOSallReset, kke::ArgumentExist, "set-all-reset", "OSar", "Reset clocks and fan.");
+	good = good && ArgParser::Instance().Register (kke::ArgOSclockSmooth, kke::ArgumentExist, "set-clocks-smooth", "OScs", "Makes sure higher perfs never have lower clocks.");
+	good = good && ArgParser::Instance().Register (kke::ArgOSclocksGpuReset, kke::ArgumentExist, "set-clocks-gpu-reset", "OScgr", "Reset GPU clocks.");
+	good = good && ArgParser::Instance().Register (kke::ArgOSclocksMemReset, kke::ArgumentExist, "set-clocks-mem-reset", "OScmr", "Reset Memory clocks.");
+	good = good && ArgParser::Instance().Register (kke::ArgOSclocksVddcReset, kke::ArgumentExist, "set-clocks-vddc-reset", "OScvr", "Reset VDDC voltage.");
+	good = good && ArgParser::Instance().Register (kke::ArgOSPerfReset, kke::ArgumentExist, "set-perf-reset", "OSpr", "Reset all clocks on current perf level.");
+	good = good && ArgParser::Instance().Register (kke::ArgOSPerfAllReset, kke::ArgumentExist, "set-perf-all-reset", "OSpar", "Reset all perf levels.");
+	good = good && ArgParser::Instance().Register (kke::ArgOSallReset, kke::ArgumentExist, "set-all-reset", "OSar", "Reset all perf levels and fan.");
 	
-	// Display	
+	// Display
 // 	good = good && ArgParser::Instance().Register(kke::ArgDGPixelFormat, kke::ArgumentExist, "get-pixel-format", "DGpf", "Pixel format (HDMI).");
 // 	good = good && ArgParser::Instance().Register(kke::ArgDSPixelFormat, kke::ArgumentString, "set-pixel-format", "DSpf", "Pixel format (HDMI).");
 	good = good && ArgParser::Instance().Register(kke::ArgDGConDisplays, kke::ArgumentExist, "get-con-displays", "DGcd", "Show connected displays.");
