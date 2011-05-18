@@ -171,6 +171,10 @@ void GlakkeClock::output()
 		}
 	}
 	
+	// Arg not depending on current device
+	if (ArgParser::Instance().Exist(kke::ArgHGdevices))
+		cout <<  devices.size() << endl;
+	
 	// Run through devices
 	for (uint i = startDevice; i < endDevice; i++)
 	{
@@ -615,7 +619,7 @@ void GlakkeClock::output()
 					alignArg("- Device options", "", "", col1, col2, col3);
 					break;
 					
-				case kke::ArgHGinfo:
+				case kke::ArgHGdevices:
 					cout << endl;
 					alignArg("- Hardware", "", "", col1, col2, col3);
 					break;
@@ -686,6 +690,7 @@ bool GlakkeClock::registerArgs()
 	good = good && ArgParser::Instance().Register (kke::ArgPollMax, kke::ArgumentExist, "poll-max", "Cpma", "Read maximum values.");
 	
 	// Hardware info
+	good = good && ArgParser::Instance().Register (kke::ArgHGdevices, kke::ArgumentExist, "get-devices", "HGdc", "Amount of devices.");
 	good = good && ArgParser::Instance().Register (kke::ArgHGinfo, kke::ArgumentExist, "get-info", "HGi", "Device information.");
 	good = good && ArgParser::Instance().Register (kke::ArgHGinfoLevels, kke::ArgumentExist, "get-info-levels", "HGil", "Extended device information.");
 	good = good && ArgParser::Instance().Register (kke::ArgHGname, kke::ArgumentExist, "get-name", "HGn", "Device name.");
@@ -713,7 +718,7 @@ bool GlakkeClock::registerArgs()
 	good = good && ArgParser::Instance().Register (kke::ArgOSfan, kke::ArgumentInt, "set-fan", "OSf", "Set fan speed, recommend Percent (default) type.");
 
 	// Set device values. (capital S to avoid typo).
-	good = good && ArgParser::Instance().Register (kke::ArgOSclockSmooth, kke::ArgumentExist, "set-clocks-smooth", "OScs", "Makes sure higher perfs never have lower clocks.");
+	good = good && ArgParser::Instance().Register (kke::ArgOSclockSmooth, kke::ArgumentExist, "toggle-clocks-smooth", "OStcs", "Makes sure higher perfs never have lower clocks.");
 	good = good && ArgParser::Instance().Register (kke::ArgOSclocksGpu, kke::ArgumentInt, "set-clocks-gpu", "OScg", "Set GPU speed (MHz).");
 	good = good && ArgParser::Instance().Register (kke::ArgOSclocksMem, kke::ArgumentInt, "set-clocks-mem", "OScm", "Set Memory speed (MHz).");
 	good = good && ArgParser::Instance().Register (kke::ArgOSclocksVddc, kke::ArgumentInt, "set-clocks-vddc", "OScv", "Set VDDC voltage (mV).");

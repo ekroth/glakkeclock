@@ -1,0 +1,363 @@
+.TH GLAKKECLOCK "1" "MAY 2011"
+.SH NAME
+glakkeclock \- ATI/AMD GPU utility
+.SH SYNOPSIS
+.B glakkeclock
+[-options]
+.SH DESCRIPTION
+.B glakkeclock
+is mainly a wrapper around the 
+.B (ADL) AMD Display Library, 
+and makes it easier to get and set GPU setting such as GPU speed, memory speed, vddc/volt and fan speed.
+.SH OPTIONS
+
+.SS Program options
+
+.B -h, --help
+.RS
+Help dialog.
+.RE
+
+.B -v, --version
+.RS
+Version.
+.RE
+
+.B -d, --debug
+.RS
+Toggle debug messages.
+.RE
+
+.B -c --color
+.RS
+Toggle colored messages.
+.RE
+
+
+.SS Device options
+
+.B -Cdn, --device-name
+.RS
+Choose a device by 
+.B name. 
+This device will be subject of all set and get options. If duplicate device names exist on system, this will result in an error. By default all devices will be used. 
+.RE
+
+.B -Cdu, --device-udid
+.RS
+Choose a device by 
+.B UDID (Universally unique identifier).
+This device will be subject of all set and get options. The UDID is unique for each device, and will work correctly on systems that have devices with the same names. By default all devices will be used.
+.RE
+
+.B -Cdi, --device-index
+.RS
+Choose a device by 
+.B index.
+This device will be subject of all set and get options. The index is set by
+.B glakkeclock
+and will always be the same, unless adding or removing devices from system. The index is often (always?) the order the devices were found by kernel.
+By default all devices will be used.
+.RE
+
+.B -Cpl, --perf-level
+.RS
+Choose a performance level. This performance level will be subject of all set and get options, and performance level specific options. Valid values are integers between 0 and the amount of performance levels on the device minus one. By default the currently active performance level will be used.
+.RE
+
+.B -Cai, --poll-adapter
+.RS
+Each device can consist of multiple logical adapters (often depending on the amount of display outputs). By default adapter index 
+.B 0
+will be used for getting and setting device options. If the user would like to try another adapter index - which often 
+.I won't make a difference
+- valid options are 0 to the amount of logical adapters on the device minus one. 
+.RE
+
+.B -Ctp, --toggle-perf
+.RS
+This will enable reading values from the performance level instead of currently active vales. However, often reading from the currently active performance level will be the same as the currently active values.
+.RE
+
+.B -Ctdp, --toggle-def-perf
+.RS
+This will enable reading values from the
+.B default
+performance levels. The default performance levels are set by device BIOS and/or device drivers.
+.RE
+
+.B -Cil, --ignore-limits
+.RS
+Disables any limit checks when clocking or changing fan speed. By default glakkeclock won't allow going above or below limits. The limits are chosen by device BIOS and or/drivers, and trying to set values above or below these limits will often not be possible.
+.RE
+
+.B -Cal, --all-cards
+.RS
+Enables setting values on all devices at once. By default glakkeclock won't allow setting values on multiple cards at once.
+.RE
+
+.B -Cpmi, --poll-min
+.RS
+Enable reading minimum values.
+.RE
+
+.B -Cpma, --poll-max
+.RS
+Enable reading maximum values.
+.RE
+
+
+.SS Hardware values
+
+.B -HGdc, --get-devices
+.RS
+Amount of devices.
+.RE
+
+.B -HGi, --get-info
+.RS
+A lot of device information.
+.RE
+
+.B -HGil, --get-info-levels
+.RS
+A lot of device information including all performance levels.
+.RE
+
+.B -HGn, --get-name
+.RS
+Device name.
+.RE
+
+.B -HGu, --get-udid
+.RS
+Device UDID (Universally unique identifier).
+.RE
+
+.B -HGin, --get-index
+.RS
+Device index.
+.RE
+
+.B -HGp, --get-part
+.RS
+Device part number.
+.RE
+
+.B -HGv, --get-version
+.RS
+Device version.
+.RE
+
+.B -HGd, --get-date
+.RS
+Device date.
+.RE
+
+.B -HGa, --get-adapters
+.RS
+Amount of logical adapters on device.
+.RE
+
+
+.SS Bus
+
+.B -HGbl, --get-bus-lanes
+.RS
+PCI-E bus lanes.
+.RE
+
+.B -HGlm, --get-bus-lanes-max
+.RS
+Max PCI-E bus lanes.
+.RE
+
+.B -HGbs, --get-bus-speed
+.RS
+PCI-E bus speed.
+.RE
+
+
+.SS Frequencies and temperature
+
+.B -OGpl, --get-perf-level
+.RS
+Device's current performance level.
+.RE
+
+.B -OGcg, --get-clocks-gpu
+.RS
+GPU frequency. Value returned will depend on other parameters.
+.RE
+
+.B -OGcm, --get-clocks-mem
+.RS
+Memory frequency. Value returned will depend on other parameters.
+.RE
+
+.B -OGcv, --get-clocks-vddc
+.RS
+VDDC/Volt. Value returned will depend on other parameters.
+.RE
+
+.B -OGga, --get-gpu-activity
+.RS
+GPU activity.
+.RE
+
+.B -OGct, --get-gpu-temp
+.RS
+GPU temperature.
+.RE
+
+
+.SS Fan
+
+.B -OCft, --fan-type
+.RS
+Choose fan type for getting and setting fan values.
+.RE
+
+.B -OGf, --get-fan
+.RS
+Fan speed.
+.RE
+
+.B -OSf, --set-fan
+.RS
+Set fan speed.
+.RE
+
+
+.SS Overclocking
+
+.B -OStcs, --toggle-clocks-smooth
+.RS
+On some tested devices the performance levels' values are required to go from lowest to highest.
+Enabling this option automatically force lower performance levels to have lower or equal values, and higher performance levels to have higher or equal values.
+.RE
+
+.B -OScg, --set-clocks-gpu
+.RS
+Set GPU frequency.
+.RE
+
+.B -OScm, --set-clocks-mem
+.RS
+Set Memory frequency.
+.RE
+
+.B -OScv, --set-clocks-vddc
+.RS
+Set VDDC/Volt.
+.RE
+
+
+.SS Reset to defaults
+
+.B -OSfr, --set-fan-reset
+.RS
+Reset fan speed.
+.RE
+
+.B -OScgr, --set-clocks-gpu-reset
+.RS
+Reset GPU frequency.
+.RE
+
+.B -OScmr, --set-clocks-mem-reset
+.RS
+Reset Memory frequency.
+.RE
+
+.B -OScvr, --set-clocks-vddc-reset
+.RS
+Reset VDDC/Volt.
+.RE
+
+.B -OSpr, --set-perf-reset
+.RS
+Reset all clocks on current performance level.
+.RE
+
+.B -OSpar, --set-perf-all-reset
+.RS
+Reset all clocks on all performance levels.
+.RE
+
+.B -OSar, --set-all-reset
+.RS
+Reset all clocks on all performance levels, and fan speed.
+.RE
+
+.SH EXAMPLES
+Long argument names will be use for clarity, short argument names work exactly the same way.
+.P
+
+.B --device-name 'ATI Radeon HD 4870' --get-index
+.RS
+The index of a specific device.
+.RE
+
+.B --device-index 0 --get-clocks-gpu --toggle-perf --perf-level 2
+.RS
+Returns the performance level 2's GPU frequency, on device with index 0.
+.RE
+
+.B --poll-max --device-udid '256:37952:4098:9281:5762' --get-clocks-mem
+.RS
+Returns the maximum frequency possible of memory on specific device.
+.RE
+
+.B --get-fan --fan-type RPM
+.RS
+Return fan speed value by RPM.
+.RE
+
+.B --device-index 0 --set-clocks-gpu 675 -Cpl 0
+.RS
+Set GPU clock to 675 MHz, on performance level 0. This could fail if the value is higher than higher performance levels.
+.RE
+
+.B --device-index 0 --set-clocks-vddc 1263 -Cpl 1 --toggle-clocks-smooth
+.RS
+Set VDDC to 1263 mV on performance level 1. Lower perf levels will have lower or equal value, higher perf levels will have higher or equal value.
+.RE
+
+.B --set-clocks-mem 975 --all-cards --toggle-perf
+.RS
+Set memory prequency of currently active performance level to 975 MHz, on all cards/devices.
+.RE
+
+.P
+It is also possible to set multiple values.
+.P
+
+.B --device-index 0 --set-clocks-gpu 390 --set-clocks-mem 475 --set-clocks-vddc 1083 --toggle-clocks-smooth
+.RS
+Set current performance level values accordingly, and make sure performance levels' values are in order.
+.RE
+
+.B --device-index 1 --set-fan 35 --fan-type Percent
+.RS
+Set fan speed to 35 %.
+.RE
+
+.B --device-index 0 --set-fan 2000 --fan-type RPM
+.RS
+Set fan speed to 2000 RPM. This is 
+.B NOT
+recommended, see --fan-type Percent above.
+.RE
+
+.B --device-index 0 --get-fan --fan-type RPM
+.RS
+Return fan speed in RPM.
+.RE
+
+
+.SH AUTHOR
+Andree 'Glaucous' Ekroth <glakke1 at gmail dot com>
+
+.SH GITHUB
+https://github.com/Glakke/glakkeclock

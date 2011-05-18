@@ -49,6 +49,7 @@ namespace kke
 		ArgPollMin,
 		ArgPollMax,
 		
+		ArgHGdevices,
 		ArgHGinfo,
 		ArgHGinfoLevels,
 		ArgHGname,
