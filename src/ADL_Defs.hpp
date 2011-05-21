@@ -27,6 +27,9 @@ namespace kke
 	typedef int (*ADL_OVERDRIVE5_ODPARAMETERS_GET)(int, ADLODParameters*);
 	typedef int (*ADL_OVERDRIVE5_ODPERFORMANCELEVELS_GET)(int, int, ADLODPerformanceLevels*);
 	typedef int (*ADL_OVERDRIVE5_ODPERFORMANCELEVELS_SET)(int, ADLODPerformanceLevels*);
+	
+	// Various
+	typedef int (*ADL_DISPLAY_WRITEANDREADI2CREV_GET)(int iAdapterIndex, int *lpMajor, int *lpMinor);
 
 	// Display
 	typedef int (*ADL_DISPLAY_DISPLAYINFO_GET)(int, int*, ADLDisplayInfo**, int);

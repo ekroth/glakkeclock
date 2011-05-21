@@ -42,6 +42,7 @@ namespace kke
 		ArgCdeviceIndex,
 		ArgCperfLevel,
 		ArgCpollAdaptIndex,
+		ArgCpollThermIndex,
 		ArgCperfValue,
 		ArgCperfDefValue,
 		ArgBypass,

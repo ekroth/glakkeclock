@@ -157,6 +157,8 @@ namespace kke
 		
 		void SetPollAdapter(int index);
 		int GetPollAdapter() const;
+		void SetPollThermal(int index);
+		int GetPollThermal() const;
 		
 		// Detect/Refresh Adapters.
 		void DetectAdapters();

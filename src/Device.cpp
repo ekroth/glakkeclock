@@ -420,6 +420,16 @@ int Device::GetPollAdapter() const
 	return pollAdapter;
 }
 
+void Device::SetPollThermal(int index)
+{
+	pollThermal = index;
+}
+
+int Device::GetPollThermal() const
+{
+	return pollThermal;
+}
+
 void Device::DetectAdapters()
 {
 // 	LOGGROUP(Log_Debug, "Device") << "Detecting adapters for specific device..";

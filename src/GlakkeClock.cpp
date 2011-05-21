@@ -206,6 +206,8 @@ void GlakkeClock::output()
 			}
 		}
 		
+		device.SetPollThermal(ArgParser::Instance().GetInt(ArgCpollThermIndex, 0));
+		
 		// --- Big info
 		if (ArgParser::Instance().Exist(kke::ArgHGinfo) || ArgParser::Instance().Exist(kke::ArgHGinfoLevels))
 		{
@@ -672,6 +674,7 @@ bool GlakkeClock::registerArgs()
 	good = good && ArgParser::Instance().Register (kke::ArgCdeviceIndex, kke::ArgumentInt, "device-index", "Cdi", "Choose device by index.");
 	good = good && ArgParser::Instance().Register (kke::ArgCperfLevel, kke::ArgumentInt, "perf-level", "Cpl", "Choose performance level. (Get and set)");
 	good = good && ArgParser::Instance().Register (kke::ArgCpollAdaptIndex, kke::ArgumentInt, "poll-adapter", "Cai", "Choose polling adapter index.");
+	good = good && ArgParser::Instance().Register (kke::ArgCpollThermIndex, kke::ArgumentInt, "poll-thermal", "Cat", "Choose polling thermal index.");
 	good = good && ArgParser::Instance().Register (kke::ArgCperfValue, kke::ArgumentExist, "toggle-perf", "Ctp", "Read values of performance levels.");
 	good = good && ArgParser::Instance().Register (kke::ArgCperfDefValue, kke::ArgumentExist, "toggle-def-perf", "Ctdp", "Read values of default performance levels.");
 	good = good && ArgParser::Instance().Register (kke::ArgBypass, kke::ArgumentExist, "ignore-limits", "Cil", "Ignore limits, use with caution!");
