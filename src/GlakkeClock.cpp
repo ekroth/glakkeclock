@@ -243,18 +243,8 @@ void GlakkeClock::output()
 
 			if (device.PollFanSpeed().Valid && device.PollFanInfo().Valid)
 			{
-// 				int speedType = ArgParser::Instance().GetString(kke::ArgOCfanType, "Percent") == "RPM" ? ADL_DL_FANCTRL_SPEED_TYPE_RPM : ADL_DL_FANCTRL_SPEED_TYPE_PERCENT;
-// 				if (speedType == ADL_DL_FANCTRL_SPEED_TYPE_RPM)
-// 				{
-// 					cout << "Fan speed: " << device.PollFanSpeed(speedType).Data.iFanSpeed << " [" << device.PollFanInfo().Data.iMinRPM << '-' << device.PollFanInfo().Data.iMaxRPM << ']' << endl;
-// 				}
-// 				else
-// 				{
-// 					cout << "Fan speed: " << device.PollFanSpeed(speedType).Data.iFanSpeed << " % [" << device.PollFanInfo().Data.iMinPercent << '-' << device.PollFanInfo().Data.iMaxPercent << ']' << endl;
-// 				}
-
 				cout << "Fan RPM: " << device.PollFanSpeed(ADL_DL_FANCTRL_SPEED_TYPE_RPM).Data.iFanSpeed << " [" << device.PollFanInfo().Data.iMinRPM << '-' << device.PollFanInfo().Data.iMaxRPM << ']' << endl;
-				cout << "Fan percent: " << device.PollFanSpeed(ADL_DL_FANCTRL_SPEED_TYPE_PERCENT).Data.iFanSpeed << " % [" << device.PollFanInfo().Data.iMinPercent << '-' << device.PollFanInfo().Data.iMaxPercent << ']' << endl;
+				cout << "Fan percent (%): " << device.PollFanSpeed(ADL_DL_FANCTRL_SPEED_TYPE_PERCENT).Data.iFanSpeed << " [" << device.PollFanInfo().Data.iMinPercent << '-' << device.PollFanInfo().Data.iMaxPercent << ']' << endl;
 			}
 			
 			if (device.PollActivity().Valid)
