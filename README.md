@@ -1,10 +1,13 @@
 # Glakkeclock
 ## Websites
 GitHub: https://github.com/Glakke/glakkeclock
+
 SourceForge: https://sourceforge.net/projects/glakkeclock
 
+AUR/makepkg: https://aur.archlinux.org/packages.php?ID=48488
+
 ## Source
-	The primary place for up-to-date source code is at GitHub:
+	The primary place for up-to-date source code is at GitHub.
 	I'll try to keep the SourceForge page somewhat up-to-date with "bigger" releases.
 
 ## Binaries (SourceForge)
@@ -42,7 +45,3 @@ make
 
 ### Install
 make install
-
-### makepkg users
-AUR/makepkg package available at https://aur.archlinux.org/packages.php?ID=48488
-This will be the "easiest" way to build and install.
