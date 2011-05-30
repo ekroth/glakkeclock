@@ -1,11 +1,13 @@
 # Glakkeclock
+## Websites
+GitHub: https://github.com/Glakke/glakkeclock
+SourceForge: https://sourceforge.net/projects/glakkeclock
 
 ## Source
 	The primary place for up-to-date source code is at GitHub:
-	https://github.com/Glakke/glakkeclock
 	I'll try to keep the SourceForge page somewhat up-to-date with "bigger" releases.
 
-## Binaries
+## Binaries (SourceForge)
 ### Windows binaries
 	I have compiled a binary for Windows, I will try to keep this somewhat up-to-date.
 	The binary hasn't been tested on x86 Windows, only x86_64. (No worries
