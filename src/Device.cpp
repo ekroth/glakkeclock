@@ -32,6 +32,8 @@ using std::string;
 using std::cout;
 using std::endl;
 
+typedef unsigned int uint;
+
 // Display
 
 Display::Display(const Adapter *adapter, const ADLDisplayInfo &info) : 
@@ -131,7 +133,10 @@ void Device::CreateDevices(DeviceVector &devices)
 		LOGGROUP(Log_Debug, "Device") << "iAdapterIndex: " << globalAdapters[i].iAdapterIndex;
 		LOGGROUP(Log_Debug, "Device") << "iDeviceNumber: " << globalAdapters[i].iDeviceNumber;
 		LOGGROUP(Log_Debug, "Device") << "strUDID: " << globalAdapters[i].strUDID;
+		#ifdef LINUX
+		// Only exists on Windows? Nah, something is wrong. TODO: FIX!
 		LOGGROUP(Log_Debug, "Device") << "iDriverIndex: " << globalAdapters[i].iDrvIndex;
+		#endif
 		LOGGROUP(Log_Debug, "Device") << "iBusNumber: " << globalAdapters[i].iBusNumber;
 		
 		bool alreadyExists = false;

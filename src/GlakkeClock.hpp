@@ -18,15 +18,8 @@
     along with GlakkeClock.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "IO/ArgParser.hpp"
-
-#include <ADL/adl_sdk.h>
-
 #include <vector>
 #include <string>
-#include <stdlib.h>
-#include <dlfcn.h>
-#include <string.h>
 
 namespace kke
 {
@@ -108,6 +101,6 @@ namespace kke
 		
 		void output();
 		
-		void alignArg(const std::string &first, const std::string &second, const std::string& third, uint col1, uint col2, uint col3) const;
+		void alignArg(const std::string &first, const std::string &second, const std::string& third, unsigned int col1, unsigned int col2, unsigned int col3) const;
 	};
 }

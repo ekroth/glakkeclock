@@ -30,6 +30,12 @@
 #include <cstdlib>
 #include <string>
 
+#ifdef WINDOWS
+	#include <windows.h>
+#else
+	#include <dlfcn.h>
+#endif
+
 // Memory allocation function
 void* __stdcall ADL_Main_Memory_Alloc(int iSize);
 // Optional Memory de-allocation function
@@ -136,10 +142,11 @@ namespace kke
 
 	#if defined (LINUX)
 		static void* adlLib;
-	#else
-		HINSTANCE hDLL;
-	#endif
 		static void* getProcAddress(void *lib, const char *name);
+	#else
+		static HINSTANCE adlLib;
+		static void* getProcAddress(HINSTANCE lib, const char *name);
+	#endif
 	};
 }
 

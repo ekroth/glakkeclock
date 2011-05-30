@@ -22,6 +22,7 @@
 #include "kkeADL.hpp"
 #include "Device.hpp"
 #include "Debug/Logger.hpp"
+#include "IO/ArgParser.hpp"
 
 #include <string>
 #include <iostream>
@@ -36,6 +37,8 @@ using std::endl;
 using std::string;
 using std::setw;
 
+typedef unsigned int uint;
+
 int GlakkeClock::Execute (int argc, char** argv)
 {
 // #ifdef DEBUG
@@ -43,7 +46,11 @@ int GlakkeClock::Execute (int argc, char** argv)
 // 	cout << "By Andrée 'Glaucous' Ekroth, 2011" << endl << endl;
 // #endif
 
-	// After setting devices, we will have to clean afterwards.
+	#ifdef DEBUG
+	Logger::SetLogLevel(Log_Debug);
+	ADLManager::SetOutputErrors(true);
+	#endif
+	
 	ArgParser::Instance().CaseSense(false); // Ignore capital letters
 	if (!registerArgs())
 	{

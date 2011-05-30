@@ -22,23 +22,20 @@
 #include "Debug/Logger.hpp"
 
 #include <cstdlib>
-#include <dlfcn.h>
 #include <fstream>
 #include <iostream>
 #include <string>
-
-#if defined (LINUX)
-#define GetProc dlsym
-#else
-#define GetProc GetProcAddress
-#endif
 
 using namespace kke;
 
 using std::endl;
 using std::string;
 
-void *ADLManager::adlLib;
+#ifdef WINDOWS
+	HINSTANCE ADLManager::adlLib;
+#else
+	void *ADLManager::adlLib;
+#endif
 
 ADL_MAIN_CONTROL_CREATE					ADLManager::_ADL_Main_Control_Create;
 ADL_MAIN_CONTROL_DESTROY				ADLManager::_ADL_Main_Control_Destroy;
@@ -94,17 +91,16 @@ bool ADLManager::Init()
 #if defined (LINUX)
 	adlLib = dlopen(ADLLOC, RTLD_LAZY | RTLD_GLOBAL);
 #else
-	adlLib = LoadLibrary("atiadlxx.dll");
-	if(adlLib == NULL)
-		// A 32 bit calling application on 64 bit OS will fail to LoadLIbrary.
-		// Try to load the 32 bit library (atiadlxy.dll) instead
-		adlLib = LoadLibrary("atiadlxy.dll");
+	adlLib = LoadLibrary(ADLLOC);
 #endif
 	// Get addresses of all needed functions.
 
 	_ADL_Main_Control_Create = (ADL_MAIN_CONTROL_CREATE)getProcAddress(adlLib, "ADL_Main_Control_Create");
 	if(_ADL_Main_Control_Create == 0)
+	{
+		LOGGER(Log_Error) << "SAY WAT";
 		return false;
+	}
 
 	_ADL_Main_Control_Destroy = (ADL_MAIN_CONTROL_DESTROY)getProcAddress(adlLib, "ADL_Main_Control_Destroy");
 	if(_ADL_Main_Control_Destroy == 0)
@@ -139,13 +135,6 @@ bool ADLManager::Init()
 		LOGGROUP(Log_Error, "ADLManager") << "ADL_Main_Control_Create was not successful.";
 		return false;
 	}
-
-#if defined (LINUX)
-	dlclose(adlLib);
-#else
-	FreeLibrary(adlLib);
-#endif
-	adlLib = NULL;
 	
 	LOGGROUP(Log_Debug, "ADLManager") << "..successfully initialized ADL!";
 
@@ -156,17 +145,36 @@ void ADLManager::Terminate()
 {
 	if(!GetAdlErr(_ADL_Main_Control_Destroy()))
 		LogError("Destroy ADL failed.");
+		
+#if defined (LINUX)
+	dlclose(adlLib);
+#else
+	FreeLibrary(adlLib);
+#endif
+	adlLib = 0;
 }
 
-void *ADLManager::getProcAddress(void *lib, const char *name)
-{
-	void *address = GetProc(lib, name);
+#ifdef WINDOWS
+	void* ADLManager::getProcAddress(HINSTANCE lib, const char *name)
+	{
+		void *address = (void*)GetProcAddress(lib, name);
 
-	if(address == 0)
-		LogError("Failed to get address: " + std::string(name));
+		if(address == 0)
+			LogError("Failed to get address: " + std::string(name));
 
-	return address;
-}
+		return address;
+	}
+#else
+	void* ADLManager::getProcAddress(void *lib, const char *name)
+	{
+		void *address = dlsym(lib, name);
+
+		if(address == 0)
+			LogError("Failed to get address: " + std::string(name));
+
+		return address;
+	}
+#endif
 
 bool ADLManager::GetAdlErr(int error)
 {

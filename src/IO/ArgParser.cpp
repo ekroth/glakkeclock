@@ -131,7 +131,7 @@ bool ArgParser::Process(int argc, char **argv)
 	{
 		string current(argv[i]);
 		bool validArg = false;
-		int argId;
+		int argId = 0;
 		
 		// Find argument with same name
 		for (ArgMap::iterator it = argMap.begin(); it != argMap.end(); it++)
