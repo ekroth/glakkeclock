@@ -13,8 +13,7 @@ AUR/makepkg: https://aur.archlinux.org/packages.php?ID=48488
 ## Binaries (SourceForge)
 ### Windows binaries
 	I have compiled a binary for Windows, I will try to keep this somewhat up-to-date.
-	The binary hasn't been tested on x86 Windows, only x86_64. (No worries
-	the worst thing that could happen is that the application won't start.)
+	Binary should work for both x86 and x86_64.
 
 ## Linux binaries
 	I won't be supplying any Linux binaries.
