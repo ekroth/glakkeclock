@@ -22,19 +22,20 @@ DOC
 )
 
 FIND_LIBRARY(
-ADL_LIBRARY
+	ADL_LIBRARY
 
-NAMES
-atiadlxx
-atiadlxy
+	NAMES
+	atiadlxx
+	atiadlxy
 
-PATHS
-/usr/lib/fglrx
+	PATHS
+	/usr/lib/fglrx
 
-DOC
-"ADL library location")
+	DOC
+	"ADL library location")
 
 IF (NOT ADL_LIBRARY)
+	MESSAGE(STATUS "Library not found, finding file instead.")
 	FIND_FILE(
 	ADL_LIBRARY
 
@@ -49,8 +50,5 @@ IF (NOT ADL_LIBRARY)
 	"ADL library location")
 ENDIF()
 
-MESSAGE(STATUS "INC: ${ADL_INCLUDE_DIR}")
-MESSAGE(STATUS "LIB: ${ADL_LIBRARY}")
-
-#INCLUDE(FindPackageHandleStandardArgs)
-#FIND_PACKAGE_HANDLE_STANDARD_ARGS(ADL DEFAULT_MSG ADL_LIBRARY ADL_INCLUDE_DIR)
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(ADL DEFAULT_MSG ADL_LIBRARY ADL_INCLUDE_DIR)

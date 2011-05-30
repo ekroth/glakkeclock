@@ -88,19 +88,44 @@ bool ADLManager::Init()
 	LOGGROUP(Log_Debug, "ADLManager") << "Initializing ADL..";
 	// Load the library.
 
+	LOGGROUP(Log_Debug, "ADLManager") << "Trying " << ADLLOC;
+	
 #if defined (LINUX)
 	adlLib = dlopen(ADLLOC, RTLD_LAZY | RTLD_GLOBAL);
 #else
 	adlLib = LoadLibrary(ADLLOC);
+	
+	if (adlLib == 0)
+	{
+		// Workaround for SysWOW64
+		string tmp = ADLLOC;
+		const char* x = "atiadlxx.dll";
+		const char* y = "atiadlxy.dll";
+		const size_t loc = tmp.find("atiadlx");
+		const size_t lgt = string("atiadlxx.dll").length();
+		
+		if (tmp.find("atiadlxx.dll") != string::npos)
+			tmp.replace(loc, lgt, y);
+		else
+			tmp.replace(loc, lgt, x);
+			
+		LOGGROUP(Log_Debug, "ADLManager") << "Trying " << tmp;
+			
+		adlLib = LoadLibrary(tmp.c_str());
+	}
+	
 #endif
+	
+	if (adlLib == 0)
+	{
+		LOGGROUP(Log_Error, "ADLManager") << "Unable to load ADL library.";
+	}
+	
 	// Get addresses of all needed functions.
 
 	_ADL_Main_Control_Create = (ADL_MAIN_CONTROL_CREATE)getProcAddress(adlLib, "ADL_Main_Control_Create");
 	if(_ADL_Main_Control_Create == 0)
-	{
-		LOGGER(Log_Error) << "SAY WAT";
 		return false;
-	}
 
 	_ADL_Main_Control_Destroy = (ADL_MAIN_CONTROL_DESTROY)getProcAddress(adlLib, "ADL_Main_Control_Destroy");
 	if(_ADL_Main_Control_Destroy == 0)

@@ -46,25 +46,53 @@ int GlakkeClock::Execute (int argc, char** argv)
 // 	cout << "By Andrée 'Glaucous' Ekroth, 2011" << endl << endl;
 // #endif
 
-	#ifdef DEBUG
+#ifdef DEBUG
 	Logger::SetLogLevel(Log_Debug);
 	ADLManager::SetOutputErrors(true);
-	#endif
+#endif
 	
+	bool initOk = true;
 	ArgParser::Instance().CaseSense(false); // Ignore capital letters
 	if (!registerArgs())
 	{
+		initOk = false;
 		LOGGROUP(Log_Error, "Main") << "Failed when registering arguments.";
 	}
-	else if (!ArgParser::Instance().Process(argc, argv))
+	
+	if (initOk)
+		if (!ArgParser::Instance().Process(argc, argv))
+		{
+			initOk = false;
+			LOGGROUP(Log_Error, "Main") << "Failed when processing arguments.";
+		}
+	
+	if (initOk)
 	{
-		LOGGROUP(Log_Error, "Main") << "Failed when processing arguments.";
+		// Output debug
+		if (ArgParser::Instance().Exist(kke::ArgDebug))
+		{
+			ADLManager::SetOutputErrors(true);
+			Logger::SetLogLevel(Log_Debug);
+		}
+		else
+		{
+			ADLManager::SetOutputErrors(false);
+			Logger::SetLogLevel(Log_Message);
+		}
+	
+		if (ArgParser::Instance().Exist(kke::ArgColor))
+			Logger::SetColorOutput(true);
+		else
+			Logger::SetColorOutput(false);
+			
+		if (!ADLManager::Init())
+		{
+			initOk = false;
+			LOGGROUP(Log_Error, "Main") << "Failed when initializing ADLManager.";
+		}
 	}
-	else if (!ADLManager::Init())
-	{
-		LOGGROUP(Log_Error, "Main") << "Failed when initializing ADLManager.";
-	}
-	else
+	
+	if (initOk)
 	{
 		LOGGROUP(Log_Debug, "Main") << "Main initializating successful.";
 		output();
@@ -78,23 +106,6 @@ int GlakkeClock::Execute (int argc, char** argv)
 
 void GlakkeClock::output()
 {
-	// Output debug
-	if (ArgParser::Instance().Exist(kke::ArgDebug))
-	{
-		ADLManager::SetOutputErrors(true);
-		Logger::SetLogLevel(Log_Debug);
-	}
-	else
-	{
-		ADLManager::SetOutputErrors(false);
-		Logger::SetLogLevel(Log_Message);
-	}
-	
-	if (ArgParser::Instance().Exist(kke::ArgColor))
-		Logger::SetColorOutput(true);
-	else
-		Logger::SetColorOutput(false);
-	
 	kke::DeviceVector devices;
 	Device::CreateDevices(devices);
 	
