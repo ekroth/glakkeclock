@@ -41,15 +41,7 @@ typedef unsigned int uint;
 
 int GlakkeClock::Execute (int argc, char** argv)
 {
-// #ifdef DEBUG
-// 	cout << "GlakkeClock - ATI/AMD GPU Utility. Version: " << VERSION << endl;
-// 	cout << "By Andrée 'Glaucous' Ekroth, 2011" << endl << endl;
-// #endif
-
-#ifdef DEBUG
-	Logger::SetLogLevel(Log_Debug);
 	ADLManager::SetOutputErrors(true);
-#endif
 	
 	bool initOk = true;
 	ArgParser::Instance().CaseSense(false); // Ignore capital letters
@@ -71,12 +63,10 @@ int GlakkeClock::Execute (int argc, char** argv)
 		// Output debug
 		if (ArgParser::Instance().Exist(kke::ArgDebug))
 		{
-			ADLManager::SetOutputErrors(true);
 			Logger::SetLogLevel(Log_Debug);
 		}
 		else
 		{
-			ADLManager::SetOutputErrors(false);
 			Logger::SetLogLevel(Log_Message);
 		}
 	
@@ -108,11 +98,6 @@ void GlakkeClock::output()
 {
 	kke::DeviceVector devices;
 	Device::CreateDevices(devices);
-	
-// 	for (kke::DeviceVector::iterator it = devices.begin(); it != devices.end(); it++)
-// 	{
-// 		(*it)->DetectDisplays();
-// 	}
 	
 	uint startDevice = 0, endDevice = devices.size(), perfLevel = ArgParser::Instance().GetInt(kke::ArgCperfLevel, 0);
 	
@@ -229,6 +214,8 @@ void GlakkeClock::output()
 		// --- Big info
 		if (ArgParser::Instance().Exist(kke::ArgHGinfo) || ArgParser::Instance().Exist(kke::ArgHGinfoLevels))
 		{
+			// We don't output errors during get-info*
+			ADLManager::SetOutputErrors(false);
 			// Little fix to add line between multiple cards
 			if (i != startDevice && startDevice != endDevice)
 				cout << endl << endl;
@@ -292,6 +279,8 @@ void GlakkeClock::output()
 					}
 				}
 			}
+			
+			ADLManager::SetOutputErrors(true);
 		}
 		
 		// Device info
