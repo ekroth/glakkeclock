@@ -44,3 +44,11 @@ make
 
 ### Install
 make install
+
+## Bugs
+You've found a bug? Impossible this software is bug free.
+But if you're sure, please send me an e-mail or post bug on 
+SourceForge/GitHub. Be sure to use --debug parameter.
+
+## Contact
+glakke1 at [please not spam] gmail dot com

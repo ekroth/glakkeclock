@@ -26,7 +26,7 @@ ENDIF()
 MESSAGE(STATUS "Using ARCH: ${KKE_ARCH}")
 
 # Version
-SET(KKE_VERSION "1.0-rc1" CACHE STRING "VERSION")
+SET(KKE_VERSION "1.0-rc2" CACHE STRING "VERSION")
 MESSAGE(STATUS "Version: ${KKE_VERSION}")
 
 # OS
@@ -58,9 +58,9 @@ IF (NOT WIN32)
 	NAMES
 	dl)
 ELSE()
+	MESSAGE(STATUS "Applying static linking for Windows")
 	SET(CMAKE_EXE_LINKER_FLAGS 
-	"${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc" 
-	CACHE STRING "Static linking")
+	"${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
 ENDIF()
 
 ADD_EXECUTABLE(
