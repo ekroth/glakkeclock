@@ -329,9 +329,9 @@ void GlakkeClock::output()
 		if (ArgParser::Instance().Exist(kke::ArgOGclocksGpu) && device.PollActivity().Valid)
 		{
 			if (ArgParser::Instance().Exist(kke::ArgPollMin))
-				cout << device.PollODParams().Data.sEngineClock.iMin;
+				cout << device.PollODParams().Data.sEngineClock.iMin / 100 << endl;
 			else if (ArgParser::Instance().Exist(kke::ArgPollMax))
-				cout << device.PollODParams().Data.sEngineClock.iMax;
+				cout << device.PollODParams().Data.sEngineClock.iMax / 100 << endl;
 			else
 			{
 				if (ArgParser::Instance().Exist(kke::ArgCperfValue))
@@ -346,9 +346,9 @@ void GlakkeClock::output()
 		if (ArgParser::Instance().Exist(kke::ArgOGclocksMem) && device.PollActivity().Valid)
 		{
 			if (ArgParser::Instance().Exist(kke::ArgPollMin))
-				cout << device.PollODParams().Data.sMemoryClock.iMin;
+				cout << device.PollODParams().Data.sMemoryClock.iMin / 100 << endl;
 			else if (ArgParser::Instance().Exist(kke::ArgPollMax))
-				cout << device.PollODParams().Data.sMemoryClock.iMax;
+				cout << device.PollODParams().Data.sMemoryClock.iMax / 100 << endl;
 			else
 			{
 				if (ArgParser::Instance().Exist(kke::ArgCperfValue))
@@ -363,9 +363,9 @@ void GlakkeClock::output()
 		if (ArgParser::Instance().Exist(kke::ArgOGclocksVddc) && device.PollActivity().Valid)
 		{
 			if (ArgParser::Instance().Exist(kke::ArgPollMin))
-				cout << device.PollODParams().Data.sVddc.iMin;
+				cout << device.PollODParams().Data.sVddc.iMin << endl;
 			else if (ArgParser::Instance().Exist(kke::ArgPollMax))
-				cout << device.PollODParams().Data.sVddc.iMax;
+				cout << device.PollODParams().Data.sVddc.iMax << endl;
 			else
 			{
 				if (ArgParser::Instance().Exist(kke::ArgCperfValue))

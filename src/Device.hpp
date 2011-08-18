@@ -18,6 +18,9 @@
     along with GlakkeClock.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// TODO: Figure out how Windows sorts the UUIDS.
+// Numbers etc.
+
 #ifndef KKE_DEVICE_HPP
 #define KKE_DEVICE_HPP
 
