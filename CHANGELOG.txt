@@ -1,0 +1,5 @@
+2011-11-09 Glaucous
+	* Added CHANGELOG.txt.
+	* Added --toogle-all-perf, which sets specified values to all performance levels.
+	* Fixed a bug where smooth settings clocks didn't properly set all clocks.
+	* Small performance improvements-
