@@ -65,6 +65,11 @@ By default all devices will be used.
 Choose a performance level. This performance level will be subject of all set and get options, and performance level specific options. Valid values are integers between 0 and the amount of performance levels on the device minus one. By default the currently active performance level will be used.
 .RE
 
+.B -Cpl, --perf-level
+.RS
+Apply clocks to all performance levels, takes precedence over --perf-level.
+.RE
+
 .B -Cai, --poll-adapter
 .RS
 Each device can consist of multiple logical adapters (often depending on the amount of display outputs). By default adapter index 
@@ -324,9 +329,14 @@ Set GPU clock to 675 MHz, on performance level 0. This could fail if the value i
 Set VDDC to 1263 mV on performance level 1. Lower perf levels will have lower or equal value, higher perf levels will have higher or equal value.
 .RE
 
-.B --set-clocks-mem 975 --all-cards --toggle-perf
+.B --set-clocks-mem 975 --all-cards
 .RS
 Set memory prequency of currently active performance level to 975 MHz, on all cards/devices.
+.RE
+
+.B --set-clocks-mem 975 --all-cards --toggle-all-perf
+.RS
+Set memory prequency of currently active performance level to 975 MHz, on all cards/devices, and all their performance levels.
 .RE
 
 .P

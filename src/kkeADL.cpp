@@ -582,7 +582,7 @@ bool ADLManager::ADL_Overdrive5_ODPerformanceLevels_Set(int p1, ADLODPerformance
 		return false;
 	}
 	
-	if(!GetAdlErr(_ADL_Overdrive5_ODPerformanceLevels_Set(p1, p2)))
+	if (!GetAdlErr(_ADL_Overdrive5_ODPerformanceLevels_Set(p1, p2)))
 	{
 		LogError("ADL_Overdrive5_ODPerformanceLevels_Set");
 		return false;
@@ -599,7 +599,7 @@ bool ADLManager::ADL_Display_DisplayInfo_Get(int iAdapterIndex, int *lpNumDispla
 		return false;
 	}
 	
-	if(!GetAdlErr(_ADL_Display_DisplayInfo_Get(iAdapterIndex, lpNumDisplays, lppInfo , iForceDetect)))
+	if (!GetAdlErr(_ADL_Display_DisplayInfo_Get(iAdapterIndex, lpNumDisplays, lppInfo , iForceDetect)))
 	{
 		LogError("ADL_Display_DisplayInfo_Get");
 		return false;

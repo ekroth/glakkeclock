@@ -149,6 +149,7 @@ namespace kke
 		
 		// Params set to 0 (except index) will be ignored.
 		bool ODSetOneLevel(int index, int engine, int memory, int vddc);
+		bool ODSetLevels(ADLODPerformanceLevel* levels, int count);
 		// Params set to 0 will be ignored.
 		bool ODSetAllLevels(int engine, int memory, int vddc);
 		bool ODResetAllLevels();

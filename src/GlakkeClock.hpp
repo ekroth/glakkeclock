@@ -38,6 +38,7 @@ namespace kke
 		ArgCpollThermIndex,
 		ArgCperfValue,
 		ArgCperfDefValue,
+		ArgCallPerfLevels,
 		ArgBypass,
 		ArgAllCards,
 		ArgPollMin,
@@ -100,6 +101,7 @@ namespace kke
 		bool registerArgs();
 		
 		void output();
+		void argCheck();
 		
 		void alignArg(const std::string &first, const std::string &second, const std::string& third, unsigned int col1, unsigned int col2, unsigned int col3) const;
 	};

@@ -345,43 +345,62 @@ bool Device::ODSetOneLevel(int index, int engine, int memory, int vddc)
 	perfValue.iMemoryClock = 	memory != 0 ? memory : PollActivity().Data.iMemoryClock;
 	perfValue.iVddc = 			vddc != 0 ? vddc : PollActivity().Data.iVddc;
 	
-	ADLODPerformanceLevels *perfLevelsNew = (ADLODPerformanceLevels*)malloc(lvls.Data->iSize);
+	char buffer[lvls.Data->iSize];
+	ADLODPerformanceLevels *perfLevelsNew = (ADLODPerformanceLevels*)buffer;
 	
-	// Copy curren values
+	// Copy current values
 	memcpy(perfLevelsNew, lvls.Data, lvls.Data->iSize); 
 	
 	perfLevelsNew->aLevels[index] = perfValue;
 	
 	bool result = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Set(adapters[pollAdapter]->GetInfo().iAdapterIndex, perfLevelsNew);
 	
-	free(perfLevelsNew);
+	return result;
+}
+
+bool Device::ODSetLevels(ADLODPerformanceLevel* levels, int count)
+{
+	const DPerfLvls &lvls = PollPerfLvls(false, true);
+	if (!lvls.Valid)
+		return false;
 	
+	char buffer[lvls.Data->iSize];
+	ADLODPerformanceLevels *perfLevelsNew = (ADLODPerformanceLevels*)buffer;
+	
+	// Copy current values
+	memcpy(perfLevelsNew, lvls.Data, lvls.Data->iSize); 
+	
+	for (int i = 0; i < count; i++)
+		perfLevelsNew->aLevels[i] = *levels;
+	
+	bool result = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Set(adapters[pollAdapter]->GetInfo().iAdapterIndex, perfLevelsNew);
+
 	return result;
 }
 
 bool Device::ODSetAllLevels(int engine, int memory, int vddc)
 {
-// 	const DPerfLvls &lvls = PollPerfLvls(true);
-// 	if (!lvls.Valid)
-// 		return false;
-// 	
-// 	ADLODPerformanceLevels *perfLevelsNew = (ADLODPerformanceLevels*)malloc(sizeof(ADLODPerformanceLevels) + sizeof(ADLODPerformanceLevel) * (lvls.Data.size() - 1));
-// 	perfLevelsNew->iSize = sizeof(ADLODPerformanceLevels) + sizeof(ADLODPerformanceLevel) * (lvls.Data.size() - 1);
-// 	
-// 	for (uint i = 0; i < lvls.Data.size(); i++)
-// 	{
-// 		perfLevelsNew->aLevels[i].iEngineClock = 	engine != 0 ? engine : lvls.Data[i].iEngineClock;
-// 		perfLevelsNew->aLevels[i].iMemoryClock = 	memory != 0 ? memory : lvls.Data[i].iMemoryClock;
-// 		perfLevelsNew->aLevels[i].iVddc = 			vddc != 0 ? vddc : lvls.Data[i].iVddc;
-// 	}
+	const DPerfLvls &lvls = PollPerfLvls(false, true);
+	if (!lvls.Valid)
+		return false;
 	
-// 	bool result = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Set(adapters[pollAdapter]->GetInfo().iAdapterIndex, perfLevelsNew);
+	ADLODPerformanceLevel perfValue;
+	perfValue.iEngineClock =	engine != 0 ? engine : PollActivity().Data.iEngineClock;
+	perfValue.iMemoryClock = 	memory != 0 ? memory : PollActivity().Data.iMemoryClock;
+	perfValue.iVddc = 			vddc != 0 ? vddc : PollActivity().Data.iVddc;
 	
-// 	free(perfLevelsNew);
+	char buffer[lvls.Data->iSize];
+	ADLODPerformanceLevels *perfLevelsNew = (ADLODPerformanceLevels*)buffer;
 	
-// 	return result;
+	// Copy current values
+	memcpy(perfLevelsNew, lvls.Data, lvls.Data->iSize); 
+	
+	for (int i = 0; i < PollODParams().Data.iNumberOfPerformanceLevels; i++)
+		perfLevelsNew->aLevels[i] = perfValue;
+	
+	bool result = ADLManager::ADL_Overdrive5_ODPerformanceLevels_Set(adapters[pollAdapter]->GetInfo().iAdapterIndex, perfLevelsNew);
 
-	return false;
+	return result;
 }
 
 bool Device::ODResetAllLevels()
