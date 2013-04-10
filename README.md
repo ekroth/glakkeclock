@@ -1,4 +1,8 @@
 # Glakkeclock
+
+## Important
+This project is no longer being actively developed but most features should be working as intended. For an alternative, see AMDOverdriveCtrl (https://github.com/CRogers/AMDOverdriveControlled).
+
 ## Websites
 GitHub: https://github.com/Glakke/glakkeclock
 
